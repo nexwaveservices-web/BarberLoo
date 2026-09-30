@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Details - BarberLoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/customer/discover.html" class="brand-logo">
+        <div class="brand-icon">✂</div>
+        Barber<span class="accent">Loo</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/customer/discover.html" class="nav-link">← Back to Discover</a></li>
+        <li><a href="/my-bookings.html" class="nav-link">My Bookings</a></li>
+        <li><a href="/customer/queue.html" class="nav-link">Live Ticket</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-actions">
+        <!-- Auth injected -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Shop Header Banner -->
+  <div id="shop-banner" style="position: relative; height: 280px; width: 100%; background: #1e293b;">
+    <img id="shop-cover" src="" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 15, 23, 0.2) 0%, rgba(11, 15, 23, 0.95) 100%);"></div>
+    <div class="container" style="position: absolute; bottom: -30px; left: 0; right: 0; display: flex; align-items: flex-end; gap: 20px;">
+      <div style="width: 100px; height: 100px; border-radius: var(--radius-lg); border: 4px solid var(--bg-main); overflow: hidden; background: #000; box-shadow: var(--shadow-lg);">
+        <img id="shop-logo" src="" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <div style="padding-bottom: 35px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <h1 id="shop-name" style="font-size: 2rem; font-weight: 800; color: #fff;"></h1>
+          <span id="shop-status-badge"></span>
+        </div>
+        <p id="shop-location" style="color: var(--text-muted); font-size: 0.95rem;"></p>
+      </div>
+    </div>
+  </div>
+
+  <main class="container" style="padding-top: 60px; padding-bottom: 64px;">
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: flex-start;">
+      
+      <!-- Left Column: Services Catalog -->
+      <section>
+        <div style="margin-bottom: 24px;">
+          <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 6px;">Select a Service</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Choose a service to join the live walk-in queue or reserve an appointment time.</p>
+        </div>
+
+        <div id="services-list" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="card skeleton" style="height: 100px;"></div>
+          <div class="card skeleton" style="height: 100px;"></div>
+          <div class="card skeleton" style="height: 100px;"></div>
+        </div>
+      </section>
+
+      <!-- Right Column: Shop Live Queue Status & Info -->
+      <aside style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- Live Queue Card -->
+        <div class="card" style="border-color: rgba(217, 119, 6, 0.3); background: radial-gradient(circle at top right, #1f2d45 0%, #182234 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.25rem;">⚡</span>
+              <h3 style="font-size: 1.1rem; font-weight: 700;">Live Queue Desk</h3>
+            </div>
+            <span class="badge badge-waiting">Realtime</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="background: rgba(0, 0, 0, 0.25); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+              <div id="queue-count-display" style="font-size: 1.6rem; font-weight: 800; color: var(--primary);">2</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">In Line</div>
+            </div>
+            <div style="background: rgba(0, 0, 0, 0.25); padding: 12px; border-radius: var(--radius-md); text-align: center;">
+              <div id="queue-wait-display" style="font-size: 1.6rem; font-weight: 800; color: #34d399;">~15m</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Est. Wait</div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+            Join the digital queue from your phone. You'll receive real-time alerts when your seat is approaching.
+          </p>
+
+          <button id="btn-quick-join" class="btn btn-primary" style="width: 100%;">
+            Join Queue with Top Service ⚡
+          </button>
+        </div>
+
+        <!-- Shop Overview Card -->
+        <div class="card">
+          <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Shop Overview</h3>
+          <p id="shop-description" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;"></p>
+          <div style="font-size: 0.875rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 8px;">
+              <span>📞</span>
+              <span id="shop-phone"></span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span>⏰</span>
+              <span>Mon - Sat: 9:00 AM – 7:00 PM</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '/js/supabase.js';
+    import { DEFAULT_SHOPS } from '/js/discover.js';
+    import { setupNavigation, getCurrentUser } from '/js/auth.js';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const shopId = urlParams.get('id') || 'a1b2c3d4-e5f6-4a1b-8c2d-111111111111';
+
+    let currentShop = null;
+    let shopServices = [];
+
+    async function loadShopDetails() {
+      const sb = getSupabase();
+      
+      // Attempt Supabase fetch
+      if (sb) {
+        try {
+          const { data: shop } = await sb.from('shops').select('*').eq('id', shopId).single();
+          if (shop) currentShop = shop;
+
+          const { data: services } = await sb.from('services').select('*').eq('shop_id', shopId).eq('is_active', true);
+          if (services && services.length > 0) shopServices = services;
+        } catch (e) {
+          console.warn('Using fallback data for shop details');
+        }
+      }
+
+      // Fallback
+      if (!currentShop) {
+        currentShop = DEFAULT_SHOPS.find(s => s.id === shopId) || DEFAULT_SHOPS[0];
+      }
+
+      if (shopServices.length === 0) {
+        shopServices = [
+          { id: 'srv-1', name: 'Signature Precision Haircut', description: 'Consultation, precision scissor & clipper cut, neck shave, and premium styling finish.', price: 45.00, duration: 30 },
+          { id: 'srv-2', name: 'Hot Towel Royal Shave', description: 'Pre-shave essential oils, 3 hot towel steams, straight-razor shave, and soothing balm.', price: 40.00, duration: 30 },
+          { id: 'srv-3', name: 'The Executive Cut & Beard Combo', description: 'Complete signature haircut plus full beard shaping, contouring, and hot oil treatment.', price: 75.00, duration: 50 },
+          { id: 'srv-4', name: 'Beard Sculpt & Razor Lineup', description: 'Detailed beard trimming, clipper work, straight razor edging, and organic balm.', price: 28.00, duration: 20 }
+        ];
+      }
+
+      // Populate DOM
+      document.getElementById('shop-name').textContent = currentShop.name;
+      document.getElementById('shop-location').textContent = `📍 ${currentShop.address}, ${currentShop.city}`;
+      document.getElementById('shop-description').textContent = currentShop.description;
+      document.getElementById('shop-phone').textContent = currentShop.phone || '+1 (415) 555-0192';
+      document.getElementById('shop-cover').src = currentShop.cover_url || 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80';
+      document.getElementById('shop-logo').src = currentShop.logo_url || 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=200&q=80';
+      
+      const badge = document.getElementById('shop-status-badge');
+      if (currentShop.is_open !== false) {
+        badge.className = 'badge badge-open';
+        badge.textContent = 'Open Now';
+      } else {
+        badge.className = 'badge badge-closed';
+        badge.textContent = 'Closed';
+      }
+
+      // Render services
+      const list = document.getElementById('services-list');
+      list.innerHTML = shopServices.map(srv => `
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 22px;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">${srv.name}</h4>
+              <span class="badge" style="background: rgba(255,255,255,0.06); color: var(--text-muted); font-size: 0.7rem;">${srv.duration} mins</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.4; margin-bottom: 6px;">${srv.description}</p>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">$${Number(srv.price).toFixed(2)}</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
+            <button class="btn btn-primary btn-sm" onclick="window.joinQueue('${srv.id}')">
+              Join Queue ⚡
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="window.bookSlot('${srv.id}')">
+              Book Slot 📅
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('btn-quick-join').addEventListener('click', () => {
+        if (shopServices.length > 0) {
+          window.joinQueue(shopServices[0].id);
+        }
+      });
+    }
+
+    window.joinQueue = async function(serviceId) {
+      const user = await getCurrentUser();
+      if (!user) {
+        sessionStorage.setItem('redirect_after_login', `/customer/queue.html?shop_id=${shopId}&service_id=${serviceId}`);
+        window.location.href = '/login.html';
+        return;
+      }
+      window.location.href = `/customer/queue.html?shop_id=${shopId}&service_id=${serviceId}&action=join`;
+    };
+
+    window.bookSlot = function(serviceId) {
+      window.location.href = `/booking.html?shop_id=${shopId}&service_id=${serviceId}`;
+    };
+
+    loadShopDetails();
+    setupNavigation();
+  </script>
+</body>
+</html>

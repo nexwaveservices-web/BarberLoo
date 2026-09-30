@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Services - BarberLoo PRO</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container nav-inner">
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <a href="/barber/dashboard.html" class="brand-logo">
+          <div class="brand-icon">✂</div>
+          Barber<span class="accent">Loo</span>
+          <span style="font-size: 0.75rem; background: var(--secondary-light); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px;">PRO</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="/barber/dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="/barber/queue.html" class="nav-link">Live Queue Desk</a></li>
+          <li><a href="/barber/appointments.html" class="nav-link">Appointments</a></li>
+          <li><a href="/barber/services.html" class="nav-link active">Services</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-add-service" class="btn btn-primary btn-sm">+ Add New Service</button>
+        <button id="btn-logout" class="btn btn-outline btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 900px; padding-top: 36px; padding-bottom: 64px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+      <div>
+        <h1 style="font-size: 1.85rem; font-weight: 800;">Services & Pricing Menu</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Configure the treatments and cuts customers can queue for and book online.</p>
+      </div>
+    </div>
+
+    <!-- Services List -->
+    <div id="services-grid" style="display: flex; flex-direction: column; gap: 14px;">
+      <!-- Populated via script -->
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '/js/supabase.js';
+    import { requireAuth, signOut, showToast } from '/js/auth.js';
+
+    let services = [
+      { id: 'srv-1', name: 'Signature Precision Haircut', description: 'Consultation, precision scissor & clipper cut, neck shave, and premium styling finish.', price: 45.00, duration: 30, is_active: true },
+      { id: 'srv-2', name: 'Hot Towel Royal Shave', description: 'Pre-shave essential oils, 3 hot towel steams, straight-razor shave, and soothing balm.', price: 40.00, duration: 30, is_active: true },
+      { id: 'srv-3', name: 'The Executive Cut & Beard Combo', description: 'Complete signature haircut plus full beard shaping, contouring, and hot oil treatment.', price: 75.00, duration: 50, is_active: true },
+      { id: 'srv-4', name: 'Beard Sculpt & Razor Lineup', description: 'Detailed beard trimming, clipper work, straight razor edging, and organic balm.', price: 28.00, duration: 20, is_active: true }
+    ];
+
+    function renderServices() {
+      const container = document.getElementById('services-grid');
+      container.innerHTML = services.map(srv => `
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">${srv.name}</h3>
+              <span class="badge ${srv.is_active ? 'badge-open' : 'badge-closed'}">${srv.is_active ? 'Active' : 'Inactive'}</span>
+              <span class="badge" style="background: rgba(255,255,255,0.06); color: var(--text-muted);">${srv.duration} mins</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 6px;">${srv.description}</p>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">$${Number(srv.price).toFixed(2)}</div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline btn-sm" onclick="window.toggleService('${srv.id}')">
+              ${srv.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="window.editService('${srv.id}')">
+              Edit
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.toggleService = function(id) {
+      const srv = services.find(s => s.id === id);
+      if (srv) {
+        srv.is_active = !srv.is_active;
+        showToast(`Service "${srv.name}" ${srv.is_active ? 'activated' : 'deactivated'}`, 'info');
+        renderServices();
+      }
+    };
+
+    window.editService = function(id) {
+      const srv = services.find(s => s.id === id);
+      if (!srv) return;
+      const newPrice = prompt(`Update price for ${srv.name}:`, srv.price);
+      if (newPrice !== null && !isNaN(Number(newPrice))) {
+        srv.price = Number(newPrice);
+        showToast('Price updated', 'success');
+        renderServices();
+      }
+    };
+
+    document.getElementById('btn-add-service').addEventListener('click', () => {
+      const name = prompt('Enter service name:');
+      if (!name) return;
+      const price = prompt('Enter service price ($):', '35.00');
+      const duration = prompt('Enter service duration in minutes:', '30');
+
+      services.push({
+        id: 'srv-' + Date.now(),
+        name,
+        description: 'Professional barber treatment',
+        price: Number(price) || 35,
+        duration: Number(duration) || 30,
+        is_active: true
+      });
+
+      showToast(`Added service: ${name}`, 'success');
+      renderServices();
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => signOut());
+
+    async function init() {
+      const user = await requireAuth(['barber', 'admin']);
+      if (!user) return;
+      renderServices();
+    }
+
+    init();
+  </script>
+</body>
+</html>

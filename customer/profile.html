@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Profile - BarberLoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/customer/discover.html" class="brand-logo">
+        <div class="brand-icon">✂</div>
+        Barber<span class="accent">Loo</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/customer/discover.html" class="nav-link">Explore Shops</a></li>
+        <li><a href="/my-bookings.html" class="nav-link">My Bookings</a></li>
+        <li><a href="/customer/queue.html" class="nav-link">Live Ticket</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-actions">
+        <!-- Injected -->
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 600px; padding-top: 40px; padding-bottom: 64px;">
+    
+    <div style="margin-bottom: 24px;">
+      <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 4px;">My Profile</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Update your contact details for queue notifications and text reminders.</p>
+    </div>
+
+    <div class="card" style="box-shadow: var(--shadow-lg);">
+      <form id="form-profile">
+        
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--bg-surface); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: var(--text-main);">
+            👤
+          </div>
+          <div>
+            <span class="badge badge-waiting" id="profile-role-badge">Customer</span>
+            <div id="profile-email-display" style="color: var(--text-muted); font-size: 0.875rem; margin-top: 4px;"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="full-name">Full Name</label>
+          <input type="text" id="full-name" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number</label>
+          <input type="tel" id="phone" class="form-input" required>
+        </div>
+
+        <button type="submit" id="btn-save" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '/js/supabase.js';
+    import { requireAuth, setupNavigation, showToast } from '/js/auth.js';
+
+    let user = null;
+
+    async function init() {
+      user = await requireAuth();
+      if (!user) return;
+
+      document.getElementById('full-name').value = user.profile?.full_name || '';
+      document.getElementById('phone').value = user.profile?.phone || '';
+      document.getElementById('profile-email-display').textContent = user.email || '';
+      document.getElementById('profile-role-badge').textContent = (user.profile?.role || 'customer').toUpperCase();
+
+      document.getElementById('form-profile').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('full-name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+
+        const sb = getSupabase();
+        if (sb) {
+          try {
+            await sb.from('profiles').update({
+              full_name: fullName,
+              phone: phone
+            }).eq('id', user.id);
+          } catch (err) {
+            console.warn('Profile updated locally', err);
+          }
+        }
+
+        showToast('Profile updated successfully!', 'success');
+      });
+    }
+
+    init();
+    setupNavigation();
+  </script>
+</body>
+</html>

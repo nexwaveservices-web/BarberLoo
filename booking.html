@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment - BarberLoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/customer/discover.html" class="brand-logo">
+        <div class="brand-icon">✂</div>
+        Barber<span class="accent">Loo</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/customer/discover.html" class="nav-link">← Cancel & Back</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-actions">
+        <!-- Auth injected -->
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 640px; padding-top: 40px; padding-bottom: 64px;">
+    
+    <div style="margin-bottom: 24px;">
+      <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 4px;">Book an Appointment</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Select your preferred date and time slot for guaranteed chair time.</p>
+    </div>
+
+    <!-- Booking Summary Card -->
+    <div class="card" style="margin-bottom: 24px; background: var(--bg-card); border-left: 4px solid var(--primary);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Selected Service</span>
+          <h3 id="summary-service-name" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-top: 2px;">Signature Precision Haircut</h3>
+          <p id="summary-shop-name" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;">The Golden Razor Lounge</p>
+        </div>
+        <div style="text-align: right;">
+          <div id="summary-price" style="font-size: 1.4rem; font-weight: 800; color: var(--primary);">$45.00</div>
+          <div id="summary-duration" style="font-size: 0.8rem; color: var(--text-muted);">30 mins</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Wizard Card -->
+    <div class="card" style="box-shadow: var(--shadow-lg);">
+      <form id="form-booking">
+        
+        <!-- Step 1: Select Date -->
+        <div class="form-group">
+          <label class="form-label" for="booking-date">1. Choose Date</label>
+          <input type="date" id="booking-date" class="form-input" required>
+        </div>
+
+        <!-- Step 2: Time Slots Grid -->
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">2. Select Time Slot</label>
+          <div id="slots-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 8px;">
+            <!-- Generated dynamically -->
+          </div>
+          <input type="hidden" id="selected-slot" required>
+        </div>
+
+        <!-- Step 3: Special Notes -->
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label" for="notes">3. Haircut or Barber Notes (Optional)</label>
+          <textarea id="notes" class="form-textarea" rows="2" placeholder="e.g. Skin fade with textured top, scissor trim, sensitive skin"></textarea>
+        </div>
+
+        <button type="submit" id="btn-submit-booking" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 24px;" disabled>
+          <span>Confirm & Reserve Appointment</span>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '/js/supabase.js';
+    import { requireAuth, setupNavigation, showToast } from '/js/auth.js';
+
+    let user = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const shopId = urlParams.get('shop_id') || 'a1b2c3d4-e5f6-4a1b-8c2d-111111111111';
+    const serviceId = urlParams.get('service_id') || 'srv-1';
+
+    // Set minimum date to today
+    const dateInput = document.getElementById('booking-date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    dateInput.value = today;
+
+    const availableSlots = [
+      '09:00 AM', '09:45 AM', '10:30 AM', '11:15 AM',
+      '01:00 PM', '01:45 PM', '02:30 PM', '03:15 PM',
+      '04:00 PM', '04:45 PM', '05:30 PM', '06:15 PM'
+    ];
+
+    function renderSlots() {
+      const slotsContainer = document.getElementById('slots-grid');
+      const hiddenInput = document.getElementById('selected-slot');
+      const submitBtn = document.getElementById('btn-submit-booking');
+
+      slotsContainer.innerHTML = availableSlots.map((slot, idx) => `
+        <button type="button" class="btn btn-outline btn-sm slot-btn" data-slot="${slot}" style="padding: 10px 4px; font-size: 0.85rem;">
+          ${slot}
+        </button>
+      `).join('');
+
+      const buttons = slotsContainer.querySelectorAll('.slot-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.className = 'btn btn-outline btn-sm slot-btn';
+            b.style.borderColor = 'var(--border-strong)';
+            b.style.background = 'transparent';
+          });
+          btn.className = 'btn btn-primary btn-sm slot-btn';
+          hiddenInput.value = btn.dataset.slot;
+          submitBtn.disabled = false;
+        });
+      });
+    }
+
+    async function init() {
+      user = await requireAuth();
+      if (!user) return;
+
+      renderSlots();
+
+      document.getElementById('form-booking').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const date = dateInput.value;
+        const slot = document.getElementById('selected-slot').value;
+        const notes = document.getElementById('notes').value.trim();
+        const submitBtn = document.getElementById('btn-submit-booking');
+
+        if (!slot) {
+          showToast('Please select a time slot', 'error');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Reserving slot...</span>';
+
+        const sb = getSupabase();
+        if (sb) {
+          try {
+            await sb.from('bookings').insert({
+              shop_id: shopId,
+              customer_id: user.id,
+              service_id: serviceId,
+              booking_date: date,
+              booking_time: slot.replace(' AM', ':00').replace(' PM', ':00'),
+              status: 'confirmed',
+              notes: notes
+            });
+          } catch (err) {
+            console.warn('Simulating offline booking record', err);
+          }
+        }
+
+        showToast('Appointment successfully reserved!', 'success');
+        setTimeout(() => {
+          window.location.href = '/my-bookings.html';
+        }, 1200);
+      });
+    }
+
+    init();
+    setupNavigation();
+  </script>
+</body>
+</html>

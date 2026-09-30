@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - BarberLoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/index.html" class="brand-logo">
+        <div class="brand-icon">✂</div>
+        Barber<span class="accent">Loo</span>
+      </a>
+      <div class="nav-actions">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Already have an account?</span>
+        <a href="/login.html" class="btn btn-outline btn-sm">Log In</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px;">
+    <div class="card" style="width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 6px;">Create an Account</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Join BarberLoo to queue live and book appointments</p>
+      </div>
+
+      <!-- Role Selector Tabs -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg-surface); padding: 4px; border-radius: var(--radius-md); margin-bottom: 20px;">
+        <button type="button" id="tab-customer" class="btn btn-primary btn-sm" style="width: 100%;">
+          Customer
+        </button>
+        <button type="button" id="tab-barber" class="btn btn-outline btn-sm" style="width: 100%; border: none;">
+          Barber / Shop Owner
+        </button>
+      </div>
+
+      <div id="signup-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: rgba(220, 38, 38, 0.15); border: 1px solid rgba(220, 38, 38, 0.4); color: #f87171; font-size: 0.875rem; margin-bottom: 20px;"></div>
+
+      <form id="form-signup">
+        <input type="hidden" id="role" value="customer">
+
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name</label>
+          <input type="text" id="fullName" class="form-input" placeholder="Marcus Sterling" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number (For queue notifications)</label>
+          <input type="tel" id="phone" class="form-input" placeholder="+1 (555) 019-2834" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" class="form-input" placeholder="marcus@example.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password (Minimum 6 characters)</label>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">
+          <span id="btn-label">Create Customer Account</span>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { signUp, redirectByRole, getCurrentUser } from '/js/auth.js';
+
+    // Parse role from URL query param if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialRole = urlParams.get('role') === 'barber' ? 'barber' : 'customer';
+
+    const tabCustomer = document.getElementById('tab-customer');
+    const tabBarber = document.getElementById('tab-barber');
+    const roleInput = document.getElementById('role');
+    const btnLabel = document.getElementById('btn-label');
+    const errorBox = document.getElementById('signup-error');
+    const form = document.getElementById('form-signup');
+    const submitBtn = document.getElementById('btn-submit');
+
+    function setRole(role) {
+      roleInput.value = role;
+      if (role === 'barber') {
+        tabBarber.className = 'btn btn-primary btn-sm';
+        tabBarber.style.border = 'none';
+        tabCustomer.className = 'btn btn-outline btn-sm';
+        tabCustomer.style.border = 'none';
+        btnLabel.textContent = 'Create Barber Partner Account';
+      } else {
+        tabCustomer.className = 'btn btn-primary btn-sm';
+        tabCustomer.style.border = 'none';
+        tabBarber.className = 'btn btn-outline btn-sm';
+        tabBarber.style.border = 'none';
+        btnLabel.textContent = 'Create Customer Account';
+      }
+    }
+
+    setRole(initialRole);
+
+    tabCustomer.addEventListener('click', () => setRole('customer'));
+    tabBarber.addEventListener('click', () => setRole('barber'));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const fullName = document.getElementById('fullName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const role = roleInput.value;
+
+      submitBtn.disabled = true;
+      btnLabel.textContent = 'Creating account...';
+
+      try {
+        await signUp(email, password, fullName, phone, role);
+        redirectByRole(role);
+      } catch (err) {
+        errorBox.textContent = err.message || 'Error creating account. Please try again.';
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        btnLabel.textContent = role === 'barber' ? 'Create Barber Partner Account' : 'Create Customer Account';
+      }
+    });
+  </script>
+</body>
+</html>

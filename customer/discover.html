@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover Barber Shops - BarberLoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/customer/discover.html" class="brand-logo">
+        <div class="brand-icon">✂</div>
+        Barber<span class="accent">Loo</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/customer/discover.html" class="nav-link active">Explore Shops</a></li>
+        <li><a href="/my-bookings.html" class="nav-link">My Bookings</a></li>
+        <li><a href="/customer/queue.html" class="nav-link">My Live Ticket</a></li>
+      </ul>
+      <div class="nav-actions" id="nav-actions">
+        <!-- Injected via auth.js -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Search & Filter Header -->
+  <section style="background: linear-gradient(180deg, #111827 0%, #0b0f17 100%); padding: 48px 0 32px 0; border-bottom: 1px solid var(--border-subtle);">
+    <div class="container">
+      <div style="max-width: 760px; margin-bottom: 28px;">
+        <span class="badge badge-waiting" style="margin-bottom: 12px;">Live Wait Times & Online Booking</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+          Find Premier Barber Shops Near You
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem;">
+          Skip the crowded lobby. Join a live queue remotely or reserve a guaranteed appointment slot.
+        </p>
+      </div>
+
+      <!-- Search & Filters Container -->
+      <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 14px; background: var(--bg-card);">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <div style="flex: 2; min-width: 260px; position: relative;">
+            <input type="text" id="search-input" class="form-input" placeholder="Search by shop name, haircut type, or neighborhood..." style="padding-left: 38px;">
+            <span style="position: absolute; left: 14px; top: 12px; color: var(--text-dim);">🔍</span>
+          </div>
+
+          <div style="flex: 1; min-width: 180px;">
+            <select id="filter-city" class="form-select">
+              <option value="all">All Cities</option>
+              <option value="San Francisco">San Francisco, CA</option>
+              <option value="Oakland">Oakland, CA</option>
+            </select>
+          </div>
+
+          <button id="btn-search" class="btn btn-primary" style="padding: 12px 24px;">
+            Search Shops
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-muted);">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" id="filter-open" checked style="accent-color: var(--primary);">
+            <span>Open Now Only</span>
+          </label>
+          <span style="color: var(--border-strong);">|</span>
+          <span id="results-count" style="font-weight: 600; color: var(--text-main);">Showing shops...</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shops Grid Container -->
+  <main class="container" style="padding-top: 36px; padding-bottom: 64px;">
+    <div id="shops-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+      <!-- Skeletons while loading -->
+      <div class="card skeleton" style="height: 380px;"></div>
+      <div class="card skeleton" style="height: 380px;"></div>
+      <div class="card skeleton" style="height: 380px;"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-weight: 700; color: var(--text-main);">BarberLoo</span>
+        <span>© 2026 BarberLoo Inc. All rights reserved.</span>
+      </div>
+      <div>
+        <a href="/login.html" style="color: var(--text-muted); margin-right: 16px;">Partner Login</a>
+        <a href="/signup.html?role=barber" style="color: var(--primary);">Register Your Shop</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { fetchShops, renderShopCard } from '/js/discover.js';
+    import { setupNavigation } from '/js/auth.js';
+
+    const searchInput = document.getElementById('search-input');
+    const filterCity = document.getElementById('filter-city');
+    const filterOpen = document.getElementById('filter-open');
+    const btnSearch = document.getElementById('btn-search');
+    const grid = document.getElementById('shops-grid');
+    const resultsCount = document.getElementById('results-count');
+
+    async function loadShops() {
+      grid.innerHTML = `
+        <div class="card skeleton" style="height: 380px;"></div>
+        <div class="card skeleton" style="height: 380px;"></div>
+        <div class="card skeleton" style="height: 380px;"></div>
+      `;
+
+      const query = searchInput.value.trim();
+      const city = filterCity.value;
+      const openOnly = filterOpen.checked;
+
+      const shops = await fetchShops(query, city, openOnly);
+
+      if (!shops || shops.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1;">
+            <div class="empty-state">
+              <div class="empty-state-icon">💈</div>
+              <div class="empty-state-title">No Barber Shops Found</div>
+              <p class="empty-state-desc">We couldn't find any shops matching your filter criteria. Try adjusting your search query or city selection.</p>
+              <button class="btn btn-secondary" onclick="document.getElementById('search-input').value=''; document.getElementById('filter-city').value='all'; window.reloadShops();">Reset Filters</button>
+            </div>
+          </div>
+        `;
+        resultsCount.textContent = '0 shops found';
+        return;
+      }
+
+      resultsCount.textContent = `${shops.length} shop${shops.length > 1 ? 's' : ''} available`;
+      grid.innerHTML = shops.map(shop => renderShopCard(shop)).join('');
+    }
+
+    window.reloadShops = loadShops;
+    btnSearch.addEventListener('click', loadShops);
+    filterCity.addEventListener('change', loadShops);
+    filterOpen.addEventListener('change', loadShops);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadShops();
+    });
+
+    loadShops();
+    setupNavigation();
+  </script>
+</body>
+</html>

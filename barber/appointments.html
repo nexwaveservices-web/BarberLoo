@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments Manager - BarberLoo PRO</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container nav-inner">
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <a href="/barber/dashboard.html" class="brand-logo">
+          <div class="brand-icon">✂</div>
+          Barber<span class="accent">Loo</span>
+          <span style="font-size: 0.75rem; background: var(--secondary-light); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px;">PRO</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="/barber/dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="/barber/queue.html" class="nav-link">Live Queue Desk</a></li>
+          <li><a href="/barber/appointments.html" class="nav-link active">Appointments</a></li>
+          <li><a href="/barber/services.html" class="nav-link">Services</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-logout" class="btn btn-outline btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 960px; padding-top: 36px; padding-bottom: 64px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+      <div>
+        <h1 style="font-size: 1.85rem; font-weight: 800;">Appointments Schedule</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Review upcoming bookings, accept requests, and mark no-shows.</p>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+          <thead>
+            <tr style="background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+              <th style="padding: 14px 16px;">Client Name</th>
+              <th style="padding: 14px 16px;">Service</th>
+              <th style="padding: 14px 16px;">Date & Time</th>
+              <th style="padding: 14px 16px;">Status</th>
+              <th style="padding: 14px 16px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="appointments-tbody">
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 16px; font-weight: 600;">David Ross</td>
+              <td style="padding: 16px;">Signature Precision Haircut</td>
+              <td style="padding: 16px; color: var(--text-muted);">Today at 02:30 PM</td>
+              <td style="padding: 16px;"><span class="badge badge-open">Confirmed</span></td>
+              <td style="padding: 16px; text-align: right;">
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Marked as Completed', 'success')">Complete</button>
+                <button class="btn btn-outline btn-sm" onclick="showToast('Cancelled', 'info')" style="margin-left: 6px; color: #ef4444; border-color: rgba(239,68,68,0.3);">Cancel</button>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 16px; font-weight: 600;">Liam Chen</td>
+              <td style="padding: 16px;">Skin Fade & Razor Finish</td>
+              <td style="padding: 16px; color: var(--text-muted);">Today at 04:15 PM</td>
+              <td style="padding: 16px;"><span class="badge badge-waiting">Pending</span></td>
+              <td style="padding: 16px; text-align: right;">
+                <button class="btn btn-primary btn-sm" onclick="showToast('Appointment Confirmed', 'success')">Accept</button>
+                <button class="btn btn-outline btn-sm" onclick="showToast('Declined', 'info')" style="margin-left: 6px; color: #ef4444; border-color: rgba(239,68,68,0.3);">Decline</button>
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 16px; font-weight: 600;">Carlos Santana</td>
+              <td style="padding: 16px;">Hot Towel Royal Shave</td>
+              <td style="padding: 16px; color: var(--text-muted);">Tomorrow at 11:00 AM</td>
+              <td style="padding: 16px;"><span class="badge badge-open">Confirmed</span></td>
+              <td style="padding: 16px; text-align: right;">
+                <button class="btn btn-secondary btn-sm">Complete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { requireAuth, signOut, showToast } from '/js/auth.js';
+
+    document.getElementById('btn-logout').addEventListener('click', () => signOut());
+
+    async function init() {
+      const user = await requireAuth(['barber', 'admin']);
+      if (!user) return;
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Queue Desk - BarberLoo PRO</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <a href="/barber/dashboard.html" class="brand-logo">
+          <div class="brand-icon">✂</div>
+          Barber<span class="accent">Loo</span>
+          <span style="font-size: 0.75rem; background: var(--secondary-light); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px;">PRO</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="/barber/dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="/barber/queue.html" class="nav-link active">Live Queue Desk</a></li>
+          <li><a href="/barber/appointments.html" class="nav-link">Appointments</a></li>
+          <li><a href="/barber/services.html" class="nav-link">Services</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-actions">
+        <a href="/customer/discover.html" class="btn btn-outline btn-sm" target="_blank">View Customer View ↗</a>
+        <button id="btn-logout" class="btn btn-outline btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 36px; padding-bottom: 64px;">
+    
+    <!-- Title and Realtime Status -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h1 style="font-size: 1.85rem; font-weight: 800;">Live Queue Management Desk</h1>
+          <span class="badge badge-open">Realtime Sync Active</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Manage active seats, call waiting clients, and trigger automatic queue progression.</p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-manual-add" class="btn btn-secondary btn-sm">+ Add Walk-In</button>
+        <button id="btn-refresh" class="btn btn-outline btn-sm">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- Active Chair Spotlight (Currently Serving) -->
+    <section class="card" style="border: 2px solid #10b981; background: radial-gradient(circle at top right, #132e27 0%, #111827 100%); margin-bottom: 32px; padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.25rem;">💺</span>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #34d399;">CHAIR #1 — CURRENTLY SERVING</h2>
+        </div>
+        <span id="active-timer" style="font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--text-main); background: rgba(0,0,0,0.3); padding: 4px 12px; border-radius: var(--radius-sm);">
+          Elapsed: 18m 42s
+        </span>
+      </div>
+
+      <div id="serving-container" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div>
+          <div style="display: flex; align-items: baseline; gap: 12px;">
+            <span id="active-queue-number" style="font-size: 2.75rem; font-weight: 900; color: #34d399;">#03</span>
+            <div>
+              <h3 id="active-customer-name" style="font-size: 1.4rem; font-weight: 700;">Marcus Vance</h3>
+              <p id="active-customer-service" style="color: var(--text-muted); font-size: 0.95rem;">The Executive Cut & Beard Combo (50 mins)</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <button id="btn-complete-service" class="btn btn-primary btn-lg" style="background: #10b981; border: none;">
+            ✓ Complete & Next
+          </button>
+          <button id="btn-cancel-service" class="btn btn-outline btn-lg" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+            Cancel / No-Show
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Waiting Queue Line Table -->
+    <section class="card" style="padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 700;">Waiting In Line (<span id="waiting-count">3</span>)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Sorted chronologically by ticket number</p>
+        </div>
+        <div id="total-wait-badge" class="badge badge-waiting">Total wait: ~45 mins</div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+              <th style="padding: 12px 10px;">Queue #</th>
+              <th style="padding: 12px 10px;">Customer</th>
+              <th style="padding: 12px 10px;">Service</th>
+              <th style="padding: 12px 10px;">Duration</th>
+              <th style="padding: 12px 10px;">Joined At</th>
+              <th style="padding: 12px 10px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="waiting-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module">
+    import { getSupabase } from '/js/supabase.js';
+    import { requireAuth, signOut, showToast } from '/js/auth.js';
+
+    let waitingQueue = [
+      { id: 'q-101', queue_number: 4, customer_name: 'David Ross', service_name: 'Signature Precision Haircut', duration: 30, joined_at: '10:14 AM' },
+      { id: 'q-102', queue_number: 5, customer_name: 'Liam Chen', service_name: 'Skin Fade & Razor Finish', duration: 35, joined_at: '10:28 AM' },
+      { id: 'q-103', queue_number: 6, customer_name: 'Alex Rivera', service_name: 'Hot Towel Royal Shave', duration: 30, joined_at: '10:35 AM' }
+    ];
+
+    let currentServing = {
+      id: 'q-100',
+      queue_number: 3,
+      customer_name: 'Marcus Vance',
+      service_name: 'The Executive Cut & Beard Combo (50 mins)'
+    };
+
+    function renderQueueUI() {
+      // Serving chair
+      if (currentServing) {
+        document.getElementById('active-queue-number').textContent = `#${String(currentServing.queue_number).padStart(2, '0')}`;
+        document.getElementById('active-customer-name').textContent = currentServing.customer_name;
+        document.getElementById('active-customer-service').textContent = currentServing.service_name;
+        document.getElementById('btn-complete-service').disabled = false;
+      } else {
+        document.getElementById('active-queue-number').textContent = '--';
+        document.getElementById('active-customer-name').textContent = 'Chair is empty';
+        document.getElementById('active-customer-service').textContent = 'Call next customer from waiting queue below';
+        document.getElementById('btn-complete-service').disabled = true;
+      }
+
+      // Waiting table
+      const tbody = document.getElementById('waiting-tbody');
+      document.getElementById('waiting-count').textContent = waitingQueue.length;
+
+      const totalWait = waitingQueue.reduce((acc, curr) => acc + curr.duration, 0);
+      document.getElementById('total-wait-badge').textContent = `Total wait: ~${totalWait} mins`;
+
+      if (waitingQueue.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              No customers currently waiting in the line.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = waitingQueue.map((item, index) => `
+        <tr style="border-bottom: 1px solid var(--border-subtle);">
+          <td style="padding: 16px 10px; font-weight: 800; color: var(--primary);">#${String(item.queue_number).padStart(2, '0')}</td>
+          <td style="padding: 16px 10px; font-weight: 600;">${item.customer_name}</td>
+          <td style="padding: 16px 10px;">${item.service_name}</td>
+          <td style="padding: 16px 10px; color: var(--text-muted);">${item.duration} mins</td>
+          <td style="padding: 16px 10px; color: var(--text-dim); font-size: 0.85rem;">${item.joined_at}</td>
+          <td style="padding: 16px 10px; text-align: right;">
+            <button class="btn btn-primary btn-sm" onclick="window.startServing('${item.id}')">
+              Start Serving 💺
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="window.removeCustomer('${item.id}')" style="color: #ef4444; border-color: rgba(239,68,68,0.3); margin-left: 6px;">
+              Remove
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.startServing = function(queueId) {
+      const idx = waitingQueue.findIndex(q => q.id === queueId);
+      if (idx === -1) return;
+
+      const nextCustomer = waitingQueue.splice(idx, 1)[0];
+      currentServing = nextCustomer;
+      showToast(`Now serving #${nextCustomer.queue_number} (${nextCustomer.customer_name})`, 'success');
+      renderQueueUI();
+
+      // RPC trigger if connected to Supabase
+      const sb = getSupabase();
+      if (sb) {
+        sb.rpc('start_serving_customer', { p_queue_id: queueId });
+      }
+    };
+
+    window.removeCustomer = function(queueId) {
+      if (!confirm('Remove this customer from the queue?')) return;
+      waitingQueue = waitingQueue.filter(q => q.id !== queueId);
+      showToast('Customer removed from queue', 'info');
+      renderQueueUI();
+
+      const sb = getSupabase();
+      if (sb) {
+        sb.rpc('leave_or_cancel_queue', { p_queue_id: queueId });
+      }
+    };
+
+    document.getElementById('btn-complete-service').addEventListener('click', () => {
+      if (!currentServing) return;
+      showToast(`Completed service for #${currentServing.queue_number}!`, 'success');
+
+      const sb = getSupabase();
+      if (sb && currentServing.id) {
+        sb.rpc('complete_customer_service', { p_queue_id: currentServing.id });
+      }
+
+      // Automatically advance to next customer in line if available
+      if (waitingQueue.length > 0) {
+        currentServing = waitingQueue.shift();
+        showToast(`Next up: #${currentServing.queue_number} (${currentServing.customer_name})`, 'info');
+      } else {
+        currentServing = null;
+      }
+      renderQueueUI();
+    });
+
+    document.getElementById('btn-manual-add').addEventListener('click', () => {
+      const name = prompt('Enter walk-in customer name:');
+      if (!name) return;
+      const nextNum = Math.max(...waitingQueue.map(q => q.queue_number), currentServing?.queue_number || 0) + 1;
+      waitingQueue.push({
+        id: 'walkin-' + Date.now(),
+        queue_number: nextNum,
+        customer_name: name,
+        service_name: 'Walk-In Haircut',
+        duration: 30,
+        joined_at: 'Just now'
+      });
+      showToast(`Added ${name} to queue (#${nextNum})`, 'success');
+      renderQueueUI();
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => signOut());
+
+    async function init() {
+      const user = await requireAuth(['barber', 'admin']);
+      if (!user) return;
+      renderQueueUI();
+    }
+
+    init();
+  </script>
+</body>
+</html>

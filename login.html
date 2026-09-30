@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In - BarberLoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="/index.html" class="brand-logo">
+        <div class="brand-icon">✂</div>
+        Barber<span class="accent">Loo</span>
+      </a>
+      <div class="nav-actions">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Don't have an account?</span>
+        <a href="/signup.html" class="btn btn-outline btn-sm">Sign Up</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px;">
+    <div class="card" style="width: 100%; max-width: 440px; box-shadow: var(--shadow-lg);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 6px;">Welcome Back</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Enter your email to access your BarberLoo account</p>
+      </div>
+
+      <div id="login-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: rgba(220, 38, 38, 0.15); border: 1px solid rgba(220, 38, 38, 0.4); color: #f87171; font-size: 0.875rem; margin-bottom: 20px;"></div>
+
+      <form id="form-login">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" class="form-input" placeholder="you@domain.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" for="password">Password</label>
+          </div>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
+          <span>Sign In to BarberLoo</span>
+        </button>
+      </form>
+
+      <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 0.875rem; color: var(--text-muted);">
+        Are you a barber shop owner? 
+        <a href="/signup.html?role=barber" style="color: var(--primary); font-weight: 600;">Register your shop</a>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { signIn, getCurrentUser, redirectByRole } from '/js/auth.js';
+
+    // If already logged in, redirect
+    getCurrentUser().then(user => {
+      if (user) {
+        redirectByRole(user.profile?.role || 'customer');
+      }
+    });
+
+    const form = document.getElementById('form-login');
+    const submitBtn = document.getElementById('btn-submit');
+    const errorBox = document.getElementById('login-error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Signing in...</span>';
+
+      try {
+        const { user } = await signIn(email, password);
+        const currentUser = await getCurrentUser();
+        redirectByRole(currentUser?.profile?.role || 'customer');
+      } catch (err) {
+        errorBox.textContent = err.message || 'Invalid email or password';
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Sign In to BarberLoo</span>';
+      }
+    });
+  </script>
+</body>
+</html>
