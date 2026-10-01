@@ -27,13 +27,18 @@ get_header();
         <input type="password" name="pwd" id="user_pass" class="form-input" required autocomplete="current-password">
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 12px;">
-        Sign In to BarberLoo
-      </button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px;">
+        <button type="submit" class="btn btn-primary" style="padding: 12px; font-weight: 700;">
+          Sign In
+        </button>
+        <a href="<?php echo esc_url(home_url('/signup')); ?>" class="btn btn-secondary" style="padding: 12px; font-weight: 700; text-align: center;">
+          Sign Up
+        </a>
+      </div>
     </form>
 
     <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--text-muted);">
-      <span>New client? <a href="<?php echo esc_url(home_url('/signup')); ?>" style="color: var(--primary); font-weight: 700;">Sign Up</a></span>
+      <span>Are you a barber? <a href="<?php echo esc_url(home_url('/signup?role=barber')); ?>" style="color: var(--primary); font-weight: 700;">Salon Partner Signup</a></span>
       <span><a href="<?php echo esc_url(home_url('/barber/dashboard')); ?>" style="color: var(--text-main); font-weight: 600;">Barber PRO Desk</a></span>
     </div>
 

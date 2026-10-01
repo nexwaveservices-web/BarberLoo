@@ -742,7 +742,19 @@ apiRouter.get('/admin/stats', (req: Request, res: Response) => {
     recent_transactions: transactions.slice(-20).reverse(),
     coupons: db.coupons || [],
     shops: db.shops,
-    users: db.users.map(({ password, ...u }) => u)
+    users: db.users.map(({ password, ...u }) => {
+      const userBookings = db.appointments.filter(a => a.customer_id === u.id || a.customer_name === u.full_name);
+      const userQueue = db.queue.filter(q => q.customer_id === u.id);
+      const userTx = (db.transactions || []).filter(t => t.customer_id === u.id || t.customer_name === u.full_name);
+      const totalSpent = userTx.reduce((sum, t) => sum + (t.amount || 0), 0);
+      return {
+        ...u,
+        total_bookings: userBookings.length,
+        total_queue_tickets: userQueue.length,
+        total_spent: Number(totalSpent.toFixed(2)),
+        latest_booking: userBookings[userBookings.length - 1] || null
+      };
+    })
   });
 });
 
@@ -774,7 +786,9 @@ apiRouter.post('/admin/settings/fees', (req: Request, res: Response) => {
   const db = readDatabase();
 
   db.settings = {
-    platform_fee_fixed: platform_fee_fixed !== undefined ? Number(platform_fee_fixed) : (db.settings?.platform_fee_fixed || 3.0),
+    currency: 'INR',
+    currency_symbol: '₹',
+    platform_fee_fixed: platform_fee_fixed !== undefined ? Number(platform_fee_fixed) : (db.settings?.platform_fee_fixed || 20.0),
     platform_fee_percent: platform_fee_percent !== undefined ? Number(platform_fee_percent) : (db.settings?.platform_fee_percent || 5.0),
     enable_coupons: enable_coupons !== undefined ? Boolean(enable_coupons) : (db.settings?.enable_coupons !== false)
   };

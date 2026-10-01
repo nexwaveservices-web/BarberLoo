@@ -52,14 +52,19 @@
             <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
           </div>
 
-          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 12px;">
-            <span>Sign In to BarberLoo</span>
-          </button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px;">
+            <button type="submit" id="btn-submit" class="btn btn-primary" style="padding: 12px; font-weight: 700;">
+              <span>Sign In</span>
+            </button>
+            <a href="/signup.html" class="btn btn-secondary" style="padding: 12px; font-weight: 700; text-align: center; text-decoration: none;">
+              Sign Up
+            </a>
+          </div>
         </form>
 
         <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--text-muted);">
-          <span>New client? <a href="/signup.html" style="color: var(--primary); font-weight: 700;">Sign Up</a></span>
-          <span><a href="/signup.html?role=barber" style="color: var(--text-main); font-weight: 600;">Barber Signup</a></span>
+          <span>New client? <a href="/signup.html" style="color: var(--primary); font-weight: 700;">Create Account</a></span>
+          <span><a href="/signup.html?role=barber" style="color: var(--text-main); font-weight: 600;">Barber PRO Partner</a></span>
         </div>
       </div>
 

@@ -45,19 +45,19 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 32px;">
       <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
         <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">TOTAL TRANSACTION VOLUME</span>
-        <div id="stat-gross-volume" style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-top: 6px;">$0.00</div>
+        <div id="stat-gross-volume" style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-top: 6px;">₹0.00</div>
         <div style="font-size: 0.8rem; color: #059669; margin-top: 4px; font-weight: 600;">Gross bookings processed</div>
       </div>
 
       <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
         <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">PLATFORM FEE REVENUE</span>
-        <div id="stat-platform-revenue" style="font-size: 2.2rem; font-weight: 800; color: #166534; margin-top: 6px;">$0.00</div>
+        <div id="stat-platform-revenue" style="font-size: 2.2rem; font-weight: 800; color: #166534; margin-top: 6px;">₹0.00</div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Earned platform fees</div>
       </div>
 
       <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
         <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">BARBERS PAYOUT POOL</span>
-        <div id="stat-barber-payouts" style="font-size: 2.2rem; font-weight: 800; color: #2563eb; margin-top: 6px;">$0.00</div>
+        <div id="stat-barber-payouts" style="font-size: 2.2rem; font-weight: 800; color: #2563eb; margin-top: 6px;">₹0.00</div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Net barber payouts</div>
       </div>
 
@@ -175,6 +175,37 @@
       </div>
     </div>
 
+    <!-- Registered Customers Directory Table (Admin Super Visibility) -->
+    <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-xl); background: #ffffff; margin-bottom: 32px;">
+      <div style="padding: 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Registered Customers & Client Profiles</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Full customer directory with contact information, booking history, queue activity, and lifetime spend</p>
+        </div>
+        <span id="badge-total-customers" class="badge" style="background: #eff6ff; color: #2563eb; font-weight: 700;">Loading users...</span>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+          <thead>
+            <tr style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+              <th style="padding: 12px 16px;">Customer Name</th>
+              <th style="padding: 12px 16px;">Email Address</th>
+              <th style="padding: 12px 16px;">Phone (WhatsApp/SMS)</th>
+              <th style="padding: 12px 16px;">Account Role</th>
+              <th style="padding: 12px 16px;">Total Bookings</th>
+              <th style="padding: 12px 16px;">Queue Tickets</th>
+              <th style="padding: 12px 16px;">Lifetime Spend</th>
+              <th style="padding: 12px 16px;">Member Since</th>
+            </tr>
+          </thead>
+          <tbody id="admin-customers-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Live Transactions Stream Table -->
     <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-xl); background: #ffffff; margin-bottom: 32px;">
       <div style="padding: 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
@@ -249,9 +280,9 @@
         const stats = await apiClient.getAdminStats();
 
         // 1. KPI Cards
-        document.getElementById('stat-gross-volume').textContent = `$${Number(stats.financials?.gross_volume || 0).toFixed(2)}`;
-        document.getElementById('stat-platform-revenue').textContent = `$${Number(stats.financials?.platform_revenue || 0).toFixed(2)}`;
-        document.getElementById('stat-barber-payouts').textContent = `$${Number(stats.financials?.barber_payouts || 0).toFixed(2)}`;
+        document.getElementById('stat-gross-volume').textContent = `₹${Number(stats.financials?.gross_volume || 0).toFixed(2)}`;
+        document.getElementById('stat-platform-revenue').textContent = `₹${Number(stats.financials?.platform_revenue || 0).toFixed(2)}`;
+        document.getElementById('stat-barber-payouts').textContent = `₹${Number(stats.financials?.barber_payouts || 0).toFixed(2)}`;
         document.getElementById('stat-total-counts').textContent = `${stats.total_shops || 0} / ${stats.total_queue_tickets || 0}`;
 
         // 2. Platform fee inputs
@@ -266,7 +297,7 @@
           couponsContainer.innerHTML = stats.coupons.map(c => `
             <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: var(--radius-full); font-size: 0.85rem;">
               <strong style="color: var(--primary);">${c.code}</strong>
-              <span style="color: var(--text-muted);">(${c.discount_type === 'percent' ? c.discount_value + '%' : '$' + c.discount_value})</span>
+              <span style="color: var(--text-muted);">(${c.discount_type === 'percent' ? c.discount_value + '%' : '₹' + c.discount_value})</span>
               <span style="font-size: 0.75rem; background: #e5e7eb; padding: 2px 6px; border-radius: 10px;">${c.usage_count || 0} uses</span>
               <button onclick="window.removeCoupon('${c.id}')" style="background: none; border: none; cursor: pointer; color: #dc2626; font-weight: bold; margin-left: 4px;">×</button>
             </div>
@@ -285,8 +316,8 @@
                 <td style="padding: 16px; font-weight: 700; color: var(--text-main);">${s.name}</td>
                 <td style="padding: 16px; color: var(--text-muted);">${s.city}</td>
                 <td style="padding: 16px;"><strong>${s.total_bookings}</strong> appts / <strong>${s.total_queue_tickets}</strong> tickets</td>
-                <td style="padding: 16px; font-weight: 700; color: var(--primary);">$${s.gross_revenue.toFixed(2)}</td>
-                <td style="padding: 16px; font-weight: 700; color: #2563eb;">$${s.barber_net.toFixed(2)}</td>
+                <td style="padding: 16px; font-weight: 700; color: var(--primary);">₹${s.gross_revenue.toFixed(2)}</td>
+                <td style="padding: 16px; font-weight: 700; color: #2563eb;">₹${s.barber_net.toFixed(2)}</td>
                 <td style="padding: 16px;">
                   <span class="badge ${isSuspended ? 'badge-closed' : 'badge-open'}">
                     ${isSuspended ? 'SUSPENDED' : 'ACTIVE LICENSED'}
@@ -308,7 +339,42 @@
           }).join('');
         }
 
-        // 5. Transactions Table
+        // 5. Customer Profiles Directory Table
+        const custTbody = document.getElementById('admin-customers-tbody');
+        const totalCustBadge = document.getElementById('badge-total-customers');
+        if (stats.users && stats.users.length > 0) {
+          totalCustBadge.textContent = `${stats.users.length} Registered Accounts`;
+          custTbody.innerHTML = stats.users.map(u => `
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 14px 16px; font-weight: 700; color: var(--text-main);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="display: inline-block; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light); color: var(--primary); text-align: center; line-height: 28px; font-weight: 800; font-size: 0.8rem;">
+                    ${(u.full_name || 'U').charAt(0).toUpperCase()}
+                  </span>
+                  <span>${u.full_name || 'User'}</span>
+                </div>
+              </td>
+              <td style="padding: 14px 16px; font-family: monospace; font-size: 0.85rem; color: var(--text-muted);">${u.email}</td>
+              <td style="padding: 14px 16px; font-weight: 600; color: #059669;">${u.phone || 'Not provided'}</td>
+              <td style="padding: 14px 16px;">
+                <span class="badge" style="background: ${u.role === 'admin' ? '#fef3c7; color: #b45309' : u.role === 'barber' ? '#dbeafe; color: #1e40af' : '#f0fdf4; color: #166534'}; text-transform: uppercase;">
+                  ${u.role}
+                </span>
+              </td>
+              <td style="padding: 14px 16px; font-weight: 700;">${u.total_bookings || 0}</td>
+              <td style="padding: 14px 16px; color: var(--text-muted);">${u.total_queue_tickets || 0}</td>
+              <td style="padding: 14px 16px; font-weight: 800; color: var(--primary);">₹${Number(u.total_spent || 0).toFixed(2)}</td>
+              <td style="padding: 14px 16px; color: var(--text-muted); font-size: 0.8rem;">
+                ${u.created_at ? new Date(u.created_at).toLocaleDateString() : 'Active'}
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          totalCustBadge.textContent = '0 Registered Accounts';
+          custTbody.innerHTML = '<tr><td colspan="8" style="padding: 24px; text-align: center; color: var(--text-muted);">No users found</td></tr>';
+        }
+
+        // 6. Transactions Table
         const txTbody = document.getElementById('admin-tx-tbody');
         if (stats.recent_transactions && stats.recent_transactions.length > 0) {
           txTbody.innerHTML = stats.recent_transactions.map(t => `
@@ -316,9 +382,9 @@
               <td style="padding: 14px 16px; font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">${t.id.slice(-8)}</td>
               <td style="padding: 14px 16px; font-weight: 600;">${t.shop_name}</td>
               <td style="padding: 14px 16px;">${t.customer_name}</td>
-              <td style="padding: 14px 16px; font-weight: 800; color: var(--text-main);">$${Number(t.amount).toFixed(2)}</td>
-              <td style="padding: 14px 16px; color: #2563eb; font-weight: 700;">$${Number(t.barber_earning).toFixed(2)}</td>
-              <td style="padding: 14px 16px; color: #166534; font-weight: 700;">+$${Number(t.platform_fee).toFixed(2)}</td>
+              <td style="padding: 14px 16px; font-weight: 800; color: var(--text-main);">₹${Number(t.amount).toFixed(2)}</td>
+              <td style="padding: 14px 16px; color: #2563eb; font-weight: 700;">₹${Number(t.barber_earning).toFixed(2)}</td>
+              <td style="padding: 14px 16px; color: #166534; font-weight: 700;">+₹${Number(t.platform_fee).toFixed(2)}</td>
               <td style="padding: 14px 16px;">
                 <span class="badge" style="background: var(--bg-subtle); text-transform: uppercase;">
                   ${t.payment_method === 'upi' ? '📱 UPI' : t.payment_method === 'cash' ? '💵 Cash' : '💳 Card'}

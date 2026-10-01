@@ -23,17 +23,17 @@ if (!defined('ABSPATH')) {
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-  <!-- Top Announcement Bar (Minimog Style) -->
+  <!-- Top Announcement Bar (Indian Market Highlight) -->
   <div class="announcement-bar">
     <div class="inner">
       <div style="display: flex; align-items: center; gap: 8px;">
-        <span>✂️</span>
-        <span>Zero Wait Lobby Guarantee • Real-time Live Queueing Active</span>
+        <span>🇮🇳</span>
+        <span>India's Live Digital Salon Queue • Instant UPI & Cash At Salon Supported</span>
       </div>
       <div style="display: flex; gap: 18px; align-items: center;">
-        <span>⭐️ 4.95 Average Barber Rating</span>
+        <span>⭐️ 4.95 Rating Across Delhi NCR, Mumbai & Bengaluru</span>
         <span>•</span>
-        <span>📍 Over 1,200+ Clients Served This Month</span>
+        <span>📍 50,000+ Appointments Booked</span>
       </div>
     </div>
   </div>
@@ -54,8 +54,8 @@ if (!defined('ABSPATH')) {
       </ul>
 
       <div class="nav-actions">
-        <a href="<?php echo esc_url(home_url('/login')); ?>" class="btn btn-secondary btn-sm">Sign In</a>
-        <a href="<?php echo esc_url(home_url('/customer/discover')); ?>" class="btn btn-primary btn-sm">Book Chair</a>
+        <a href="<?php echo esc_url(home_url('/login')); ?>" class="btn btn-outline btn-sm">Sign In</a>
+        <a href="<?php echo esc_url(home_url('/signup')); ?>" class="btn btn-primary btn-sm">Sign Up</a>
       </div>
     </div>
   </header>

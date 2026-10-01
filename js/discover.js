@@ -1,23 +1,24 @@
 /**
- * BarberLoo Discovery Engine
- * Connects to /api/shops with instant search and responsive cards
+ * Discover Shops Component & Helper
+ * Renders Indian salons with live queue time estimations and INR pricing
  */
 
 import { apiClient } from './api.js';
 
 export const SANDBOX_DEMO_SHOP = {
   id: '00000000-0000-0000-0000-000000000001',
-  name: 'BarberLoo Heritage Lounge',
-  description: 'Luxury grooming parlour specializing in master scissor fades and hot-towel straight razor shaves.',
-  address: '500 Howard Street, Suite 100',
-  city: 'San Francisco',
+  name: 'Royal Heritage Salon & Barbers',
+  description: 'Premier Indian men grooming salon specializing in precision fades, herbal face de-tan, traditional hot towel straight razor shaves, and Ayurvedic head massage.',
+  address: 'Shop 14, Connaught Place, Inner Circle',
+  city: 'Delhi NCR',
+  phone: '+91 98111 22334',
   rating: 4.95,
-  total_reviews: 48,
+  total_reviews: 142,
   is_open: true,
   cover_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
   logo_url: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=200&q=80',
-  services_preview: ['Master Precision Haircut ($45)', 'Hot Towel Razor Shave ($40)', 'Beard Sculpt ($28)'],
-  current_wait_mins: 15,
+  services_preview: ['Classic Precision Haircut (₹270)', 'Beard Trim & Edge (₹170)', 'Head Champi (₹220)'],
+  current_wait_mins: 10,
   waiting_count: 2
 };
 
@@ -43,7 +44,7 @@ export async function fetchShops(searchQuery = '', city = '', filterOpenOnly = f
 export function renderShopCard(shop) {
   const waitMinutes = shop.current_wait_mins !== undefined ? shop.current_wait_mins : 15;
   const inLineCount = shop.waiting_count !== undefined ? shop.waiting_count : 2;
-  const servicesList = shop.services_preview || ['Haircut ($40)', 'Beard Trim ($25)'];
+  const servicesList = shop.services_preview || ['Haircut (₹250)', 'Beard Trim (₹150)'];
 
   return `
     <div class="shop-card">
@@ -58,7 +59,7 @@ export function renderShopCard(shop) {
         <div class="shop-card-rating">
           <span>★</span>
           <span>${Number(shop.rating || 5.0).toFixed(2)}</span>
-          <span style="color: var(--text-muted); font-size: 0.75rem;">(${shop.total_reviews || 12})</span>
+          <span style="color: var(--text-muted); font-size: 0.75rem;">(${shop.total_reviews || 48})</span>
         </div>
       </div>
 

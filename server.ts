@@ -10,13 +10,57 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
-  const isProd = process.env.NODE_ENV === 'production' || !process.env.DISABLE_HMR;
 
-  // JSON Body Parser for backend API
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  // 1. Remove x-powered-by header (Security: Obscure server details)
+  app.disable('x-powered-by');
 
-  // Enable CORS for WordPress & BarberLoo.in domain embedding
+  // 2. Production Security Headers Middleware
+  app.use((req, res, next) => {
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // Clickjacking protection (ALLOW-FROM BarberLoo.in or sameorigin)
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    // Enable browser XSS filtering
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    // Referrer policy
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Permissions Policy
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+    next();
+  });
+
+  // 3. Body Parsers with payload limits (DDoS / Memory Exhaustion prevention)
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+  // 4. In-Memory Rate Limiting for Auth endpoints (Brute-Force Protection)
+  const authAttempts: Record<string, { count: number; firstAttempt: number }> = {};
+  app.use('/api/auth', (req, res, next) => {
+    if (req.method === 'POST') {
+      const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'unknown-ip';
+      const now = Date.now();
+      const windowMs = 60 * 1000; // 1 minute window
+      const maxAttempts = 20;
+
+      const record = authAttempts[clientIp] || { count: 0, firstAttempt: now };
+      if (now - record.firstAttempt > windowMs) {
+        record.count = 1;
+        record.firstAttempt = now;
+      } else {
+        record.count += 1;
+      }
+      authAttempts[clientIp] = record;
+
+      if (record.count > maxAttempts) {
+        return res.status(429).json({
+          error: 'Too many login or registration attempts. Please wait a moment before trying again.'
+        });
+      }
+    }
+    next();
+  });
+
+  // 5. CORS Headers for BarberLoo.in integration
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -93,7 +137,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`BarberLoo fullstack server listening on 0.0.0.0:${PORT}`);
+    console.log(`BarberLoo fullstack secure server listening on 0.0.0.0:${PORT}`);
   });
 }
 

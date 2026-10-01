@@ -86,8 +86,8 @@
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div class="form-group">
-              <label class="form-label" for="service-price">Your Barber Price ($)</label>
-              <input type="number" id="service-price" class="form-input" min="5" step="1" placeholder="40.00" required>
+              <label class="form-label" for="service-price">Your Barber Price (₹)</label>
+              <input type="number" id="service-price" class="form-input" min="50" step="10" placeholder="250" required>
             </div>
             <div class="form-group">
               <label class="form-label" for="service-duration">Duration (Minutes)</label>
@@ -157,13 +157,13 @@
               <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;">
                 <div>
                   <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">YOUR EARNING:</span>
-                  <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary);"> $${barberPrice.toFixed(2)}</span>
+                  <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary);"> ₹${barberPrice.toFixed(2)}</span>
                 </div>
                 <div style="font-size: 0.85rem; color: var(--text-muted);">
-                  + Platform Fee: <span style="font-weight: 600;">$${platformFee.toFixed(2)}</span>
+                  + Platform Fee: <span style="font-weight: 600;">₹${platformFee.toFixed(2)}</span>
                 </div>
                 <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); background: var(--bg-subtle); padding: 4px 10px; border-radius: var(--radius-full);">
-                  Customer Pays: $${finalPrice.toFixed(2)}
+                  Customer Pays: ₹${finalPrice.toFixed(2)}
                 </div>
               </div>
             </div>

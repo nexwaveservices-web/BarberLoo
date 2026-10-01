@@ -173,10 +173,10 @@
 
       if (shopServices.length === 0) {
         shopServices = [
-          { id: 'srv-1', name: 'Signature Precision Haircut', description: 'Consultation, precision scissor & clipper cut, neck shave, and styling finish.', price: 45.00, duration: 30 },
-          { id: 'srv-2', name: 'Hot Towel Royal Shave', description: 'Pre-shave essential oils, hot towel steam, straight-razor shave, and soothing balm.', price: 40.00, duration: 30 },
-          { id: 'srv-3', name: 'The Executive Cut & Beard Combo', description: 'Complete signature haircut plus full beard shaping and hot oil treatment.', price: 75.00, duration: 50 },
-          { id: 'srv-4', name: 'Beard Sculpt & Razor Lineup', description: 'Detailed beard trimming, clipper work, straight razor edging finish.', price: 28.00, duration: 20 }
+          { id: 'srv-1', name: 'Classic Precision Haircut & Wash', description: 'Consultation, precision scissor & clipper cut, neck shave, and styling finish.', price: 250.00, duration: 30 },
+          { id: 'srv-2', name: 'Beard Trim, Razor Edge & Shaping', description: 'Custom beard shaping, length fading, trimmer edge alignment, and warm balm treatment.', price: 150.00, duration: 20 },
+          { id: 'srv-3', name: 'Ayurvedic Hot Oil Head Champi', description: 'Traditional Indian acupressure head and shoulder massage.', price: 200.00, duration: 20 },
+          { id: 'srv-4', name: 'Royal Grooming Combo (Cut + Beard + D-Tan)', description: 'Complete grooming package: Precision cut, beard styling, herbal face D-Tan, and steam.', price: 550.00, duration: 50 }
         ];
       }
 
@@ -184,7 +184,7 @@
       document.getElementById('shop-name').textContent = currentShop.name;
       document.getElementById('shop-location').textContent = `📍 ${currentShop.address}, ${currentShop.city}`;
       document.getElementById('shop-description').textContent = currentShop.description;
-      document.getElementById('shop-phone').textContent = currentShop.phone || '+1 (415) 555-0192';
+      document.getElementById('shop-phone').textContent = currentShop.phone || '+91 98111 22334';
       document.getElementById('shop-logo').src = currentShop.logo_url || 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=200&q=80';
       
       const badge = document.getElementById('shop-status-badge');
@@ -206,7 +206,7 @@
               <span class="badge" style="background: var(--bg-subtle); color: var(--text-muted); font-size: 0.75rem;">${srv.duration} mins</span>
             </div>
             <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.45; margin-bottom: 8px;">${srv.description}</p>
-            <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">$${Number(srv.price).toFixed(2)}</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">₹${Number(srv.final_price || srv.price).toFixed(2)}</div>
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
