@@ -30,7 +30,7 @@
     constructor(config = {}) {
       this.endpoint = config.endpoint || (typeof window !== 'undefined' ? `${window.location.origin}/api/wppusher` : '/api/wppusher');
       this.apiKey = config.apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('wppusher_token') : null) || '';
-      this.repository = config.repository || 'nexwaveservices/BarberLoo';
+      this.repository = config.repository || 'nexwaveservices-web/BarberLoo';
       this.domain = config.domain || 'BarberLoo.in';
       this.branch = config.branch || 'main';
       this.debug = config.debug || false;

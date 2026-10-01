@@ -4,7 +4,7 @@
   "repository": {
     "provider": "github",
     "type": "theme",
-    "repository": "nexwaveservices/BarberLoo",
+    "repository": "nexwaveservices-web/BarberLoo",
     "branch": "main"
   },
   "deployment": {

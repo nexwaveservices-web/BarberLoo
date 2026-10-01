@@ -587,7 +587,7 @@ let wpPusherEvents: WPPusherEvent[] = [
   {
     id: 'wp-init-001',
     type: 'deploy',
-    repository: 'nexwaveservices/BarberLoo',
+    repository: 'nexwaveservices-web/BarberLoo',
     branch: 'main',
     commit: 'c4e789a',
     status: 'success',
@@ -603,7 +603,7 @@ apiRouter.get('/wppusher/status', (req: Request, res: Response) => {
     success: true,
     enabled: true,
     client_library: '/wppusher.js',
-    configured_repository: 'nexwaveservices/BarberLoo',
+    configured_repository: 'nexwaveservices-web/BarberLoo',
     domain: 'BarberLoo.in',
     current_branch: 'main',
     last_event: lastEvent,
@@ -616,7 +616,7 @@ apiRouter.post('/wppusher/deploy', (req: Request, res: Response) => {
   const { repository, branch, ref, type, triggered_by } = req.body;
   
   const shortHash = crypto.randomBytes(4).toString('hex');
-  const targetRepo = repository || 'nexwaveservices/BarberLoo';
+  const targetRepo = repository || 'nexwaveservices-web/BarberLoo';
   const newEvent: WPPusherEvent = {
     id: 'wp-' + Date.now(),
     type: 'deploy',
