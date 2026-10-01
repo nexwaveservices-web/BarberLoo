@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Up - BarberLoo</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+<body style="background: var(--bg-main);">
 
   <header class="navbar">
     <div class="container nav-inner">
@@ -16,30 +19,37 @@
         Barber<span class="accent">Loo</span>
       </a>
       <div class="nav-actions">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">Already have an account?</span>
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Already registered?</span>
         <a href="/login.html" class="btn btn-outline btn-sm">Log In</a>
       </div>
     </div>
   </header>
 
-  <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px;">
-    <div class="card" style="width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);">
+  <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 16px;">
+    <div class="card" style="width: 100%; max-width: 480px; box-shadow: var(--shadow-md); border-radius: var(--radius-xl); padding: 36px 32px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 6px;">Create an Account</h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Join BarberLoo to queue live and book appointments</p>
+        <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 6px; color: var(--text-main);">Create an Account</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Join BarberLoo for real-time queues and appointment scheduling</p>
       </div>
 
       <!-- Role Selector Tabs -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg-surface); padding: 4px; border-radius: var(--radius-md); margin-bottom: 20px;">
-        <button type="button" id="tab-customer" class="btn btn-primary btn-sm" style="width: 100%;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; background: var(--bg-subtle); padding: 6px; border-radius: var(--radius-full); margin-bottom: 24px;">
+        <button type="button" id="tab-customer" class="btn btn-primary btn-sm" style="width: 100%; border-radius: var(--radius-full);">
           Customer
         </button>
-        <button type="button" id="tab-barber" class="btn btn-outline btn-sm" style="width: 100%; border: none;">
-          Barber / Shop Owner
+        <button type="button" id="tab-barber" class="btn btn-secondary btn-sm" style="width: 100%; border: none; border-radius: var(--radius-full); background: transparent;">
+          Barber
+        </button>
+        <button type="button" id="tab-admin" class="btn btn-secondary btn-sm" style="width: 100%; border: none; border-radius: var(--radius-full); background: transparent;">
+          Admin
         </button>
       </div>
 
-      <div id="signup-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: rgba(220, 38, 38, 0.15); border: 1px solid rgba(220, 38, 38, 0.4); color: #f87171; font-size: 0.875rem; margin-bottom: 20px;"></div>
+      <div id="admin-notice" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 0.85rem; margin-bottom: 20px;">
+        🛡 <strong>Platform Admin Registration:</strong> Sets up administrative governance access. Authorized administrator email will be granted immediate access.
+      </div>
+
+      <div id="signup-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.875rem; margin-bottom: 20px;"></div>
 
       <form id="form-signup">
         <input type="hidden" id="role" value="customer">
@@ -50,7 +60,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="phone">Phone Number (For queue notifications)</label>
+          <label class="form-label" for="phone">Phone Number (For queue SMS)</label>
           <input type="tel" id="phone" class="form-input" placeholder="+1 (555) 019-2834" required>
         </div>
 
@@ -64,7 +74,7 @@
           <input type="password" id="password" class="form-input" placeholder="••••••••" minlength="6" required autocomplete="new-password">
         </div>
 
-        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">
+        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 12px;">
           <span id="btn-label">Create Customer Account</span>
         </button>
       </form>
@@ -72,33 +82,59 @@
   </main>
 
   <script type="module">
-    import { signUp, redirectByRole, getCurrentUser } from '/js/auth.js';
+    import { signUp, redirectByRole } from '/js/auth.js';
 
-    // Parse role from URL query param if present
     const urlParams = new URLSearchParams(window.location.search);
     const initialRole = urlParams.get('role') === 'barber' ? 'barber' : 'customer';
 
     const tabCustomer = document.getElementById('tab-customer');
     const tabBarber = document.getElementById('tab-barber');
+    const tabAdmin = document.getElementById('tab-admin');
+    const adminNotice = document.getElementById('admin-notice');
     const roleInput = document.getElementById('role');
     const btnLabel = document.getElementById('btn-label');
     const errorBox = document.getElementById('signup-error');
     const form = document.getElementById('form-signup');
     const submitBtn = document.getElementById('btn-submit');
 
+    function resetTab(tab) {
+      tab.className = 'btn btn-secondary btn-sm';
+      tab.style.background = 'transparent';
+      tab.style.color = 'var(--text-main)';
+      tab.style.border = 'none';
+      tab.style.borderRadius = 'var(--radius-full)';
+    }
+
+    function activateTab(tab) {
+      tab.className = 'btn btn-primary btn-sm';
+      tab.style.background = 'var(--primary)';
+      tab.style.color = '#ffffff';
+      tab.style.border = 'none';
+      tab.style.borderRadius = 'var(--radius-full)';
+    }
+
     function setRole(role) {
       roleInput.value = role;
+      resetTab(tabCustomer);
+      resetTab(tabBarber);
+      resetTab(tabAdmin);
+      adminNotice.style.display = 'none';
+
       if (role === 'barber') {
-        tabBarber.className = 'btn btn-primary btn-sm';
-        tabBarber.style.border = 'none';
-        tabCustomer.className = 'btn btn-outline btn-sm';
-        tabCustomer.style.border = 'none';
+        activateTab(tabBarber);
         btnLabel.textContent = 'Create Barber Partner Account';
+      } else if (role === 'admin') {
+        activateTab(tabAdmin);
+        adminNotice.style.display = 'block';
+        btnLabel.textContent = 'Create Admin Account';
+        if (!document.getElementById('email').value) {
+          document.getElementById('email').value = 'rgi855477@gmail.com';
+        }
+        if (!document.getElementById('fullName').value) {
+          document.getElementById('fullName').value = 'Platform Administrator';
+        }
       } else {
-        tabCustomer.className = 'btn btn-primary btn-sm';
-        tabCustomer.style.border = 'none';
-        tabBarber.className = 'btn btn-outline btn-sm';
-        tabBarber.style.border = 'none';
+        activateTab(tabCustomer);
         btnLabel.textContent = 'Create Customer Account';
       }
     }
@@ -107,6 +143,7 @@
 
     tabCustomer.addEventListener('click', () => setRole('customer'));
     tabBarber.addEventListener('click', () => setRole('barber'));
+    tabAdmin.addEventListener('click', () => setRole('admin'));
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

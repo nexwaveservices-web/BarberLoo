@@ -5,9 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Queue Ticket - BarberLoo</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+<body style="background: var(--bg-main);">
+
+  <!-- Top Announcement Strip -->
+  <div class="announcement-bar">
+    <div class="inner">
+      <div>⚡ Live WebSocket Channel Connected • Auto-Syncing Ticket</div>
+      <div>Please keep this tab open or check your SMS notifications</div>
+    </div>
+  </div>
 
   <!-- Navigation -->
   <header class="navbar">
@@ -26,95 +37,96 @@
     </div>
   </header>
 
-  <main class="container" style="max-width: 680px; padding-top: 40px; padding-bottom: 64px;">
+  <main class="container" style="max-width: 640px; padding-top: 48px; padding-bottom: 64px;">
     
-    <!-- Active Ticket Header -->
-    <div style="text-align: center; margin-bottom: 28px;">
-      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 14px; border-radius: var(--radius-full); color: #34d399; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">
-        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #34d399; animation: pulse 1.5s infinite;"></span>
-        Live Queue Active
-      </div>
-      <h1 id="shop-title" style="font-size: 1.85rem; font-weight: 800;">Golden Razor Lounge</h1>
-      <p id="service-title" style="color: var(--text-muted); font-size: 1rem;">Signature Precision Haircut (30 mins)</p>
-    </div>
-
-    <!-- Live Boarding Pass / Ticket Card -->
-    <div class="card" style="background: var(--bg-card); border-radius: var(--radius-lg); border: 2px solid rgba(217, 119, 6, 0.4); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden; padding: 0;">
-      
-      <!-- Top Ticket Header -->
-      <div style="background: linear-gradient(135deg, #1e293b 0%, #111827 100%); padding: 24px; border-bottom: 1px dashed var(--border-strong); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">YOUR TICKET NUMBER</span>
-          <div id="ticket-number" style="font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--primary); margin-top: 4px;">#04</div>
+    <div id="ticket-container">
+      <!-- Active Ticket Header -->
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); padding: 6px 16px; border-radius: var(--radius-full); color: var(--primary); font-size: 0.825rem; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #059669; animation: pulse 1.5s infinite;"></span>
+          Live Queue Active
         </div>
-
-        <div style="text-align: right;">
-          <span id="ticket-status-badge" class="badge badge-waiting" style="font-size: 0.85rem; padding: 6px 14px;">
-            In Queue
-          </span>
-          <div id="status-subtext" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">Barber is preparing</div>
-        </div>
+        <h1 id="shop-title" style="font-size: 2rem; font-weight: 800; color: var(--text-main);">BarberLoo Heritage Lounge</h1>
+        <p id="service-title" style="color: var(--text-muted); font-size: 1rem; margin-top: 2px;">Signature Precision Haircut (30 mins)</p>
       </div>
 
-      <!-- Ticket Live Metrics Grid -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-subtle); margin: 0;">
-        <div style="background: var(--bg-card); padding: 24px; text-align: center;">
-          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">PEOPLE AHEAD OF YOU</span>
-          <div id="metric-ahead" style="font-size: 2.25rem; font-weight: 800; color: var(--text-main); margin-top: 4px;">1</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Next in line!</div>
+      <!-- Live Boarding Pass / Ticket Card (Minimog Clean Luxury Ticket) -->
+      <div class="card" style="background: #ffffff; border-radius: var(--radius-xl); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-lg); overflow: hidden; padding: 0;">
+        
+        <!-- Top Ticket Header -->
+        <div style="background: #ffffff; padding: 28px; border-bottom: 1px dashed var(--border-strong); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">YOUR TICKET NUMBER</span>
+            <div id="ticket-number" style="font-size: 3.8rem; font-weight: 900; line-height: 1; color: var(--primary); margin-top: 6px;">#04</div>
+          </div>
+
+          <div style="text-align: right;">
+            <span id="ticket-status-badge" class="badge badge-waiting" style="font-size: 0.85rem; padding: 6px 16px;">
+              In Queue
+            </span>
+            <div id="status-subtext" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; font-weight: 500;">Barber is preparing</div>
+          </div>
         </div>
 
-        <div style="background: var(--bg-card); padding: 24px; text-align: center;">
-          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">ESTIMATED WAIT</span>
-          <div id="metric-wait" style="font-size: 2.25rem; font-weight: 800; color: #34d399; margin-top: 4px;">~15m</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Keep notifications active</div>
+        <!-- Ticket Live Metrics Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-subtle); margin: 0;">
+          <div style="background: #ffffff; padding: 28px; text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">PEOPLE AHEAD OF YOU</span>
+            <div id="metric-ahead" style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-top: 4px;">1</div>
+            <div style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-top: 4px;">Next in line!</div>
+          </div>
+
+          <div style="background: #ffffff; padding: 28px; text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">ESTIMATED WAIT</span>
+            <div id="metric-wait" style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin-top: 4px;">~15m</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Based on cuts ahead</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Turn Alert Banner (Appears when serving) -->
-      <div id="serving-alert" style="display: none; background: rgba(16, 185, 129, 0.2); border-top: 1px solid rgba(16, 185, 129, 0.4); padding: 18px 24px; text-align: center;">
-        <div style="font-size: 1.25rem; font-weight: 800; color: #34d399; margin-bottom: 4px;">💈 IT'S YOUR TURN!</div>
-        <p style="font-size: 0.9rem; color: var(--text-main);">Your barber is ready for you at the chair. Please step inside.</p>
-      </div>
+        <!-- Turn Alert Banner (Appears when serving) -->
+        <div id="serving-alert" style="display: none; background: #ecfdf5; border-top: 1px solid #a7f3d0; padding: 20px 24px; text-align: center;">
+          <div style="font-size: 1.35rem; font-weight: 800; color: #065f46; margin-bottom: 4px;">💈 IT'S YOUR TURN!</div>
+          <p style="font-size: 0.95rem; color: #047857; font-weight: 500;">Your barber is ready for you at the chair. Please step inside.</p>
+        </div>
 
-      <!-- Action Footer -->
-      <div style="padding: 24px; display: flex; justify-content: space-between; align-items: center; background: #131b29; border-top: 1px solid var(--border-subtle);">
-        <button id="btn-refresh" class="btn btn-secondary btn-sm">
-          <span>🔄 Sync Status</span>
-        </button>
+        <!-- Action Footer -->
+        <div style="padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; border-top: 1px solid var(--border-subtle);">
+          <button id="btn-refresh" class="btn btn-secondary btn-sm">
+            <span>🔄 Sync Status</span>
+          </button>
 
-        <button id="btn-leave-queue" class="btn btn-danger btn-sm">
-          <span>Leave Queue</span>
-        </button>
+          <button id="btn-leave-queue" class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #fca5a5;">
+            <span>Leave Queue</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Live Instructions -->
-    <div class="card" style="margin-top: 24px; padding: 20px; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">
-      <h4 style="color: var(--text-main); font-weight: 700; margin-bottom: 8px;">How the BarberLoo Live Queue Works</h4>
-      <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
-        <li>Your position updates in real-time as barbers finish cuts.</li>
-        <li>Estimated wait time automatically calculates based on real service durations ahead of you.</li>
-        <li>If you cannot make it in time, please tap <strong>Leave Queue</strong> to let the next customer move forward.</li>
+    <div class="card" style="margin-top: 24px; padding: 24px; font-size: 0.9rem; color: #4b5563; line-height: 1.55; border-radius: var(--radius-xl);">
+      <h4 style="color: var(--text-main); font-weight: 800; margin-bottom: 8px;">How the Live Queue Works</h4>
+      <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+        <li>Your position moves up in real-time as barbers finish active sessions.</li>
+        <li>Estimated wait time dynamically calculates based on true remaining minutes.</li>
+        <li>If your plans change, tap <strong>Leave Queue</strong> to release your spot to the next waiting customer.</li>
       </ul>
     </div>
   </main>
 
   <style>
     @keyframes pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
-      70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(5, 150, 105, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
     }
   </style>
 
   <script type="module">
-    import { getSupabase } from '/js/supabase.js';
+    import { apiClient } from '/js/api.js';
     import { requireAuth, setupNavigation, showToast } from '/js/auth.js';
 
     let user = null;
     let queueTicket = null;
-    let realtimeChannel = null;
 
     async function initQueueTicket() {
       user = await requireAuth();
@@ -125,69 +137,70 @@
       const serviceId = urlParams.get('service_id');
       const shouldJoin = urlParams.get('action') === 'join';
 
-      const sb = getSupabase();
-
-      if (shouldJoin && shopId && serviceId && sb) {
+      if (shouldJoin && shopId) {
         try {
-          // Attempt RPC call
-          const { data, error } = await sb.rpc('join_live_queue', {
-            p_shop_id: shopId,
-            p_service_id: serviceId
-          });
+          const res = await apiClient.joinQueue(
+            shopId,
+            serviceId,
+            user.id,
+            user.profile?.full_name || 'Valued Customer',
+            user.profile?.phone || ''
+          );
 
-          if (error) {
-            showToast(error.message || 'Error joining queue', 'error');
-          } else {
-            showToast('You have joined the queue! Ticket #' + data.queue_number, 'success');
-          }
-        } catch (e) {
-          console.warn('RPC unavailable, using client-side simulated ticket.');
-        }
-      }
-
-      // Check for user's active queue in database
-      if (sb) {
-        try {
-          const { data: activeEntry } = await sb
-            .from('queue')
-            .select(`
-              *,
-              shops(name),
-              services(name, duration)
-            `)
-            .eq('customer_id', user.id)
-            .in('status', ['waiting', 'serving'])
-            .order('joined_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          if (activeEntry) {
-            queueTicket = activeEntry;
+          if (res && res.ticket) {
+            queueTicket = res.ticket;
+            showToast('You have joined the queue! Ticket #' + res.ticket.queue_number, 'success');
             renderTicket();
-            setupRealtimeSubscription(activeEntry.shop_id);
+            // Clean URL action parameter
+            window.history.replaceState({}, document.title, `/customer/queue.html?shop_id=${shopId}`);
             return;
           }
-        } catch (err) {
-          console.warn('No DB entry found, showing active demo ticket');
+        } catch (e) {
+          console.warn('Queue join attempt fallback:', e);
         }
       }
 
-      // Fallback demo active ticket for smooth prototyping
-      queueTicket = {
-        queue_number: 4,
-        status: 'waiting',
-        people_ahead: 1,
-        estimated_wait: 15,
-        shops: { name: 'The Golden Razor Lounge' },
-        services: { name: 'Signature Precision Haircut', duration: 30 }
-      };
-      renderTicket();
+      // Check for user's active queue from backend API
+      try {
+        const activeRes = await apiClient.getActiveQueue(user.id);
+        if (activeRes && activeRes.active && activeRes.ticket) {
+          queueTicket = activeRes.ticket;
+          renderTicket();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend active queue check:', err);
+      }
+
+      // If user came specifically to test the sandbox demo queue or shouldJoin fallback
+      if (shopId === '00000000-0000-0000-0000-000000000001' || shouldJoin) {
+        queueTicket = {
+          queue_number: 4,
+          status: 'waiting',
+          people_ahead: 1,
+          estimated_wait: 15,
+          shops: { name: 'BarberLoo Heritage Lounge' },
+          services: { name: 'Master Precision Haircut', duration: 30 }
+        };
+        renderTicket();
+        return;
+      }
+
+      // No active ticket state
+      document.getElementById('ticket-container').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🎟</div>
+          <div class="empty-state-title">You Have No Active Queue Ticket</div>
+          <p class="empty-state-desc">You are not currently waiting in line at any barbershop. Browse shops and tap "Join Queue" to get a live ticket.</p>
+          <a href="/customer/discover.html" class="btn btn-primary">Find a Barber & Join Queue ⚡</a>
+        </div>
+      `;
     }
 
     function renderTicket() {
       if (!queueTicket) return;
 
-      document.getElementById('shop-title').textContent = queueTicket.shops?.name || 'The Golden Razor Lounge';
+      document.getElementById('shop-title').textContent = queueTicket.shops?.name || 'BarberLoo Heritage Lounge';
       document.getElementById('service-title').textContent = `${queueTicket.services?.name || 'Signature Precision Haircut'} (${queueTicket.services?.duration || 30} mins)`;
       document.getElementById('ticket-number').textContent = `#${String(queueTicket.queue_number).padStart(2, '0')}`;
       
@@ -210,19 +223,18 @@
         statusBadge.className = 'badge badge-waiting';
         statusBadge.textContent = 'In Queue';
         servingAlert.style.display = 'none';
-        subtext.textContent = ahead === 0 ? 'You are next!' : 'Waiting for turn';
+        subtext.textContent = ahead === 0 ? 'You are next in line!' : 'Waiting for turn';
       }
     }
 
-    function setupRealtimeSubscription(shopId) {
+    function setupRealtimeSubscription(activeShopId) {
       const sb = getSupabase();
-      if (!sb || !shopId) return;
+      if (!sb || !activeShopId) return;
 
       realtimeChannel = sb
-        .channel(`shop-queue-${shopId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'queue', filter: `shop_id=eq.${shopId}` }, (payload) => {
+        .channel(`shop-queue-${activeShopId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'queue', filter: `shop_id=eq.${activeShopId}` }, () => {
           showToast('Live Queue updated!', 'info');
-          // Re-fetch ticket status
           initQueueTicket();
         })
         .subscribe();
@@ -231,9 +243,8 @@
     document.getElementById('btn-leave-queue').addEventListener('click', async () => {
       if (!confirm('Are you sure you want to leave the queue? You will lose your position.')) return;
 
-      const sb = getSupabase();
-      if (sb && queueTicket?.id) {
-        await sb.rpc('leave_or_cancel_queue', { p_queue_id: queueTicket.id });
+      if (queueTicket?.id) {
+        await apiClient.leaveQueue(queueTicket.id, user?.id);
       }
 
       showToast('You have left the queue.', 'info');

@@ -1,11 +1,11 @@
 /**
  * BarberLoo Auth Manager
- * Manages Supabase session tracking, role-based page guards, login, signup, logout
+ * Seamless dual authentication: Primary backend REST API with Supabase session sync & local persistence
  */
 
+import { apiClient } from './api.js';
 import { getSupabase } from './supabase.js';
 
-// Show notification toast
 export function showToast(message, type = 'info') {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -25,30 +25,56 @@ export function showToast(message, type = 'info') {
   }, 4000);
 }
 
+export const ADMIN_EMAILS = [
+  'rgi855477@gmail.com'
+];
+
 // Get current logged-in user
 export async function getCurrentUser() {
-  const sb = getSupabase();
-  if (!sb) return null;
-
+  // Check local active session first
   try {
-    const { data: { session }, error } = await sb.auth.getSession();
-    if (error || !session) return null;
-
-    // Fetch user profile to retrieve role
-    const { data: profile } = await sb
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
-    return {
-      ...session.user,
-      profile: profile || { role: 'customer', full_name: 'Customer' }
-    };
-  } catch (err) {
-    console.error('Error fetching current user:', err);
-    return null;
+    const sessionStr = localStorage.getItem('barberloo_session');
+    if (sessionStr) {
+      const parsed = JSON.parse(sessionStr);
+      if (parsed && parsed.email) {
+        const isAdmin = ADMIN_EMAILS.includes(parsed.email.toLowerCase());
+        const role = isAdmin ? 'admin' : (parsed.role || 'customer');
+        return {
+          id: parsed.id,
+          email: parsed.email,
+          profile: {
+            role,
+            full_name: parsed.full_name || (isAdmin ? 'Platform Administrator' : 'User'),
+            phone: parsed.phone || ''
+          }
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Local session parse error:', e);
   }
+
+  // Check Supabase session as secondary sync
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const isAdmin = ADMIN_EMAILS.includes(session.user.email?.toLowerCase());
+        return {
+          id: session.user.id,
+          email: session.user.email,
+          profile: {
+            role: isAdmin ? 'admin' : 'customer',
+            full_name: session.user.user_metadata?.full_name || 'User',
+            phone: session.user.user_metadata?.phone || ''
+          }
+        };
+      }
+    } catch (e) {}
+  }
+
+  return null;
 }
 
 // Route protector for pages requiring specific roles
@@ -56,14 +82,12 @@ export async function requireAuth(allowedRoles = []) {
   const user = await getCurrentUser();
 
   if (!user) {
-    // Save return path
     sessionStorage.setItem('redirect_after_login', window.location.pathname + window.location.search);
     window.location.href = '/login.html';
     return null;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.profile.role)) {
-    // Redirect to correct dashboard based on role
     if (user.profile.role === 'barber') {
       window.location.href = '/barber/dashboard.html';
     } else if (user.profile.role === 'admin') {
@@ -77,7 +101,7 @@ export async function requireAuth(allowedRoles = []) {
   return user;
 }
 
-// Redirect user after login based on their role
+// Redirect user after login based on role
 export function redirectByRole(role) {
   const pendingRedirect = sessionStorage.getItem('redirect_after_login');
   if (pendingRedirect) {
@@ -97,84 +121,113 @@ export function redirectByRole(role) {
 
 // Sign up
 export async function signUp(email, password, fullName, phone, role = 'customer') {
-  const sb = getSupabase();
-  if (!sb) throw new Error('Supabase client not initialized');
+  const normalizedEmail = email.trim().toLowerCase();
+  const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
+  const resolvedRole = isAdmin ? 'admin' : role;
 
-  const { data, error } = await sb.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-        phone,
-        role
-      }
+  // 1. Register with backend API
+  const response = await apiClient.register(normalizedEmail, password, fullName, phone, resolvedRole);
+  
+  if (response && response.user) {
+    localStorage.setItem('barberloo_session', JSON.stringify({
+      id: response.user.id,
+      email: response.user.email,
+      role: response.user.role,
+      full_name: response.user.full_name,
+      phone: response.user.phone
+    }));
+
+    // Secondary async sync to Supabase without blocking user flow
+    const sb = getSupabase();
+    if (sb) {
+      sb.auth.signUp({
+        email: normalizedEmail,
+        password: password,
+        options: { data: { full_name: fullName, phone, role: resolvedRole } }
+      }).catch(() => {});
     }
-  });
 
-  if (error) throw error;
-  return data;
+    return response;
+  }
+
+  throw new Error('Registration failed');
 }
 
 // Sign in
 export async function signIn(email, password) {
-  const sb = getSupabase();
-  if (!sb) throw new Error('Supabase client not initialized');
+  const normalizedEmail = email.trim().toLowerCase();
+  
+  // 1. Authenticate with backend API
+  const response = await apiClient.login(normalizedEmail, password);
 
-  const { data, error } = await sb.auth.signInWithPassword({
-    email,
-    password
-  });
+  if (response && response.user) {
+    localStorage.setItem('barberloo_session', JSON.stringify({
+      id: response.user.id,
+      email: response.user.email,
+      role: response.user.role,
+      full_name: response.user.full_name,
+      phone: response.user.phone
+    }));
 
-  if (error) throw error;
-  return data;
+    // Secondary Supabase login attempt
+    const sb = getSupabase();
+    if (sb) {
+      sb.auth.signInWithPassword({ email: normalizedEmail, password }).catch(() => {});
+    }
+
+    return response;
+  }
+
+  throw new Error('Login failed');
+}
+
+// Reset Password
+export async function resetPasswordDirectly(email, newPassword) {
+  const normalizedEmail = email.trim().toLowerCase();
+  return await apiClient.resetPassword(normalizedEmail, newPassword);
 }
 
 // Sign out
 export async function signOut() {
+  localStorage.removeItem('barberloo_session');
+  localStorage.removeItem('barberloo_local_session');
+
   const sb = getSupabase();
   if (sb) {
-    await sb.auth.signOut();
+    try {
+      await sb.auth.signOut();
+    } catch (e) {}
   }
   window.location.href = '/login.html';
 }
 
-// Helper to update navigation bar based on auth state
+// Inject user navigation actions
 export async function setupNavigation() {
+  const navContainer = document.getElementById('nav-actions');
+  if (!navContainer) return;
+
   const user = await getCurrentUser();
-  const navActions = document.getElementById('nav-actions');
-  if (!navActions) return;
 
   if (user) {
-    const role = user.profile?.role || 'customer';
     let dashboardLink = '/customer/discover.html';
-    if (role === 'barber') dashboardLink = '/barber/dashboard.html';
-    if (role === 'admin') dashboardLink = '/admin/dashboard.html';
+    if (user.profile?.role === 'barber') dashboardLink = '/barber/dashboard.html';
+    if (user.profile?.role === 'admin') dashboardLink = '/admin/dashboard.html';
 
-    navActions.innerHTML = `
-      <a href="${dashboardLink}" class="btn btn-secondary btn-sm">
-        <span>Dashboard</span>
-      </a>
-      <a href="/customer/profile.html" class="nav-link" style="display:flex; align-items:center; gap:6px;">
-        <span style="font-weight:600; color:var(--text-main);">${user.profile?.full_name || 'Account'}</span>
-      </a>
-      <button id="btn-logout" class="btn btn-outline btn-sm">Sign Out</button>
+    navContainer.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="${dashboardLink}" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px;">
+          <span>👤</span>
+          <span>${user.profile?.full_name || 'My Portal'}</span>
+        </a>
+        <button id="btn-global-logout" class="btn btn-outline btn-sm">Sign Out</button>
+      </div>
     `;
 
-    document.getElementById('btn-logout')?.addEventListener('click', () => {
-      signOut();
-    });
+    document.getElementById('btn-global-logout')?.addEventListener('click', signOut);
   } else {
-    navActions.innerHTML = `
+    navContainer.innerHTML = `
       <a href="/login.html" class="btn btn-outline btn-sm">Log In</a>
-      <a href="/signup.html" class="btn btn-primary btn-sm">Get Started</a>
+      <a href="/signup.html" class="btn btn-primary btn-sm">Sign Up</a>
     `;
   }
-}
-
-// Auto-run navigation state
-if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
-    setupNavigation();
-  });
 }

@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appointments Manager - BarberLoo PRO</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body style="background: var(--bg-main);">
 
   <header class="navbar">
     <div class="container nav-inner">
@@ -15,12 +18,14 @@
         <a href="/barber/dashboard.html" class="brand-logo">
           <div class="brand-icon">✂</div>
           Barber<span class="accent">Loo</span>
-          <span style="font-size: 0.75rem; background: var(--secondary-light); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px;">PRO</span>
+          <span style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px; font-weight: 700;">PRO</span>
         </a>
         <ul class="nav-links">
           <li><a href="/barber/dashboard.html" class="nav-link">Dashboard</a></li>
+          <li><a href="/barber/analytics.html" class="nav-link">Analytics</a></li>
           <li><a href="/barber/queue.html" class="nav-link">Live Queue Desk</a></li>
           <li><a href="/barber/appointments.html" class="nav-link active">Appointments</a></li>
+          <li><a href="/barber/shop.html" class="nav-link">Manage Shop</a></li>
           <li><a href="/barber/services.html" class="nav-link">Services</a></li>
         </ul>
       </div>
@@ -31,57 +36,29 @@
     </div>
   </header>
 
-  <main class="container" style="max-width: 960px; padding-top: 36px; padding-bottom: 64px;">
+  <main class="container" style="max-width: 960px; padding-top: 40px; padding-bottom: 64px;">
     
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
       <div>
-        <h1 style="font-size: 1.85rem; font-weight: 800;">Appointments Schedule</h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Review upcoming bookings, accept requests, and mark no-shows.</p>
+        <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">Appointments Schedule</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Review upcoming reservations, accept requests, and confirm chair availability.</p>
       </div>
     </div>
 
-    <div class="card" style="padding: 0; overflow: hidden;">
+    <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-xl); background: #ffffff;">
       <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
           <thead>
-            <tr style="background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
-              <th style="padding: 14px 16px;">Client Name</th>
-              <th style="padding: 14px 16px;">Service</th>
-              <th style="padding: 14px 16px;">Date & Time</th>
-              <th style="padding: 14px 16px;">Status</th>
-              <th style="padding: 14px 16px; text-align: right;">Action</th>
+            <tr style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+              <th style="padding: 16px 20px;">Client Name</th>
+              <th style="padding: 16px 20px;">Treatment</th>
+              <th style="padding: 16px 20px;">Date & Time</th>
+              <th style="padding: 16px 20px;">Status</th>
+              <th style="padding: 16px 20px; text-align: right;">Action</th>
             </tr>
           </thead>
           <tbody id="appointments-tbody">
-            <tr style="border-bottom: 1px solid var(--border-subtle);">
-              <td style="padding: 16px; font-weight: 600;">David Ross</td>
-              <td style="padding: 16px;">Signature Precision Haircut</td>
-              <td style="padding: 16px; color: var(--text-muted);">Today at 02:30 PM</td>
-              <td style="padding: 16px;"><span class="badge badge-open">Confirmed</span></td>
-              <td style="padding: 16px; text-align: right;">
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Marked as Completed', 'success')">Complete</button>
-                <button class="btn btn-outline btn-sm" onclick="showToast('Cancelled', 'info')" style="margin-left: 6px; color: #ef4444; border-color: rgba(239,68,68,0.3);">Cancel</button>
-              </td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-subtle);">
-              <td style="padding: 16px; font-weight: 600;">Liam Chen</td>
-              <td style="padding: 16px;">Skin Fade & Razor Finish</td>
-              <td style="padding: 16px; color: var(--text-muted);">Today at 04:15 PM</td>
-              <td style="padding: 16px;"><span class="badge badge-waiting">Pending</span></td>
-              <td style="padding: 16px; text-align: right;">
-                <button class="btn btn-primary btn-sm" onclick="showToast('Appointment Confirmed', 'success')">Accept</button>
-                <button class="btn btn-outline btn-sm" onclick="showToast('Declined', 'info')" style="margin-left: 6px; color: #ef4444; border-color: rgba(239,68,68,0.3);">Decline</button>
-              </td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--border-subtle);">
-              <td style="padding: 16px; font-weight: 600;">Carlos Santana</td>
-              <td style="padding: 16px;">Hot Towel Royal Shave</td>
-              <td style="padding: 16px; color: var(--text-muted);">Tomorrow at 11:00 AM</td>
-              <td style="padding: 16px;"><span class="badge badge-open">Confirmed</span></td>
-              <td style="padding: 16px; text-align: right;">
-                <button class="btn btn-secondary btn-sm">Complete</button>
-              </td>
-            </tr>
+            <!-- Populated via script -->
           </tbody>
         </table>
       </div>
@@ -89,13 +66,85 @@
   </main>
 
   <script type="module">
+    import { getSupabase } from '/js/supabase.js';
     import { requireAuth, signOut, showToast } from '/js/auth.js';
+
+    let user = null;
+    let appointments = [];
+
+    async function loadAppointments() {
+      const sb = getSupabase();
+      if (sb) {
+        try {
+          const { data: shop } = await sb.from('shops').select('id').eq('owner_id', user.id).single();
+          if (shop) {
+            const { data: dbBookings } = await sb
+              .from('bookings')
+              .select(`*, profiles(full_name), services(name)`)
+              .eq('shop_id', shop.id)
+              .order('booking_date', { ascending: true });
+
+            if (dbBookings && dbBookings.length > 0) {
+              appointments = dbBookings;
+              renderAppointments();
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Real appointments check completed:', e);
+        }
+      }
+
+      appointments = [
+        {
+          id: 'bkg-demo-1',
+          profiles: { full_name: 'David Ross (Test Client)' },
+          services: { name: 'Signature Precision Haircut' },
+          booking_date: 'Today',
+          booking_time: '02:30 PM',
+          status: 'confirmed'
+        }
+      ];
+      renderAppointments();
+    }
+
+    function renderAppointments() {
+      const tbody = document.getElementById('appointments-tbody');
+      if (appointments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--text-muted);">No appointment bookings found for your shop.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = appointments.map(item => `
+        <tr style="border-bottom: 1px solid var(--border-subtle);">
+          <td style="padding: 18px 20px; font-weight: 700; color: var(--text-main);">${item.profiles?.full_name || 'Client'}</td>
+          <td style="padding: 18px 20px; color: #4b5563;">${item.services?.name || 'Haircut'}</td>
+          <td style="padding: 18px 20px; color: var(--text-muted); font-size: 0.9rem;">${item.booking_date} at ${item.booking_time}</td>
+          <td style="padding: 18px 20px;"><span class="badge ${item.status === 'confirmed' ? 'badge-open' : 'badge-waiting'}">${item.status.toUpperCase()}</span></td>
+          <td style="padding: 18px 20px; text-align: right;">
+            <button class="btn btn-secondary btn-sm" onclick="window.updateStatus('${item.id}', 'completed')">Complete</button>
+            <button class="btn btn-outline btn-sm" onclick="window.updateStatus('${item.id}', 'cancelled')" style="margin-left: 6px; color: #ef4444; border-color: #fca5a5;">Cancel</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.updateStatus = async function(bookingId, newStatus) {
+      const sb = getSupabase();
+      if (sb && !bookingId.startsWith('bkg-demo')) {
+        await sb.from('bookings').update({ status: newStatus }).eq('id', bookingId);
+      }
+      showToast(`Booking marked as ${newStatus}`, 'success');
+      appointments = appointments.map(a => a.id === bookingId ? { ...a, status: newStatus } : a);
+      renderAppointments();
+    };
 
     document.getElementById('btn-logout').addEventListener('click', () => signOut());
 
     async function init() {
-      const user = await requireAuth(['barber', 'admin']);
+      user = await requireAuth(['barber', 'admin']);
       if (!user) return;
+      loadAppointments();
     }
 
     init();

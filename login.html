@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log In - BarberLoo</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+<body style="background: var(--bg-main);">
 
   <header class="navbar">
     <div class="container nav-inner">
@@ -16,50 +19,109 @@
         Barber<span class="accent">Loo</span>
       </a>
       <div class="nav-actions">
-        <span style="color: var(--text-muted); font-size: 0.9rem;">Don't have an account?</span>
+        <span style="color: var(--text-muted); font-size: 0.9rem;">New to BarberLoo?</span>
         <a href="/signup.html" class="btn btn-outline btn-sm">Sign Up</a>
       </div>
     </div>
   </header>
 
-  <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px;">
-    <div class="card" style="width: 100%; max-width: 440px; box-shadow: var(--shadow-lg);">
-      <div style="text-align: center; margin-bottom: 28px;">
-        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 6px;">Welcome Back</h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Enter your email to access your BarberLoo account</p>
-      </div>
-
-      <div id="login-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: rgba(220, 38, 38, 0.15); border: 1px solid rgba(220, 38, 38, 0.4); color: #f87171; font-size: 0.875rem; margin-bottom: 20px;"></div>
-
-      <form id="form-login">
-        <div class="form-group">
-          <label class="form-label" for="email">Email Address</label>
-          <input type="email" id="email" class="form-input" placeholder="you@domain.com" required autocomplete="email">
+  <main class="container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 16px;">
+    <div class="card" style="width: 100%; max-width: 460px; box-shadow: var(--shadow-md); border-radius: var(--radius-xl); padding: 36px 32px; background: #ffffff;">
+      
+      <!-- Standard Login View -->
+      <div id="view-login">
+        <div style="text-align: center; margin-bottom: 28px;">
+          <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 6px; color: var(--text-main);">Welcome Back</h1>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">Enter your email to manage queues and bookings</p>
         </div>
 
-        <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label class="form-label" for="password">Password</label>
+        <div id="login-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.875rem; margin-bottom: 20px;"></div>
+        <div id="login-success" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 0.875rem; margin-bottom: 20px;"></div>
+
+        <form id="form-login">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="you@domain.com" required autocomplete="email">
           </div>
-          <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" for="password">Password</label>
+              <a href="javascript:void(0)" id="link-show-reset" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Forgot Password?</a>
+            </div>
+            <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 12px;">
+            <span>Sign In to BarberLoo</span>
+          </button>
+        </form>
+
+        <!-- Admin Quick Access Badge -->
+        <div style="margin-top: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 14px 16px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>🛡</span>
+              <span style="font-weight: 800; color: #166534; font-size: 0.85rem;">Platform Super Admin</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #15803d; margin-top: 2px;">
+              <code>rgi855477@gmail.com</code>
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" id="btn-fill-admin" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 5px 10px;">Fill</button>
+            <button type="button" id="btn-admin-direct-enter" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 5px 12px; background: #166534; border-color: #166534;">Instant Admin Login ⚡</button>
+          </div>
         </div>
 
-        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
-          <span>Sign In to BarberLoo</span>
-        </button>
-      </form>
-
-      <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); text-align: center; font-size: 0.875rem; color: var(--text-muted);">
-        Are you a barber shop owner? 
-        <a href="/signup.html?role=barber" style="color: var(--primary); font-weight: 600;">Register your shop</a>
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--text-muted);">
+          <span>New admin? <a href="/signup.html?role=admin" style="color: var(--primary); font-weight: 700;">Register as Admin</a></span>
+          <span><a href="/signup.html?role=barber" style="color: var(--text-main); font-weight: 600;">Barber Signup</a></span>
+        </div>
       </div>
+
+      <!-- Instant Password Reset / Set View -->
+      <div id="view-reset" style="display: none;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Set New Password</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Set or update your password immediately without waiting for an email.</p>
+        </div>
+
+        <div id="reset-error" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 0.875rem; margin-bottom: 18px;"></div>
+        <div id="reset-success" style="display: none; padding: 12px; border-radius: var(--radius-sm); background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 0.875rem; margin-bottom: 18px;"></div>
+
+        <form id="form-instant-reset">
+          <div class="form-group">
+            <label class="form-label" for="reset-email">Account Email</label>
+            <input type="email" id="reset-email" class="form-input" placeholder="you@domain.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reset-new-password">New Password (Min. 6 chars)</label>
+            <input type="password" id="reset-new-password" class="form-input" placeholder="••••••••" minlength="6" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reset-confirm-password">Confirm Password</label>
+            <input type="password" id="reset-confirm-password" class="form-input" placeholder="••••••••" minlength="6" required>
+          </div>
+
+          <button type="submit" id="btn-submit-reset" class="btn btn-primary" style="width: 100%; margin-top: 14px; padding: 12px;">
+            <span>Save Password & Sign In</span>
+          </button>
+
+          <button type="button" id="btn-back-to-login" class="btn btn-outline" style="width: 100%; margin-top: 10px; padding: 10px;">
+            Back to Sign In
+          </button>
+        </form>
+      </div>
+
     </div>
   </main>
 
   <script type="module">
-    import { signIn, getCurrentUser, redirectByRole } from '/js/auth.js';
+    import { signIn, getCurrentUser, redirectByRole, resetPasswordDirectly } from '/js/auth.js';
 
-    // If already logged in, redirect
     getCurrentUser().then(user => {
       if (user) {
         redirectByRole(user.profile?.role || 'customer');
@@ -69,10 +131,59 @@
     const form = document.getElementById('form-login');
     const submitBtn = document.getElementById('btn-submit');
     const errorBox = document.getElementById('login-error');
+    const successBox = document.getElementById('login-success');
 
+    const viewLogin = document.getElementById('view-login');
+    const viewReset = document.getElementById('view-reset');
+    const linkShowReset = document.getElementById('link-show-reset');
+    const btnBackToLogin = document.getElementById('btn-back-to-login');
+
+    const formInstantReset = document.getElementById('form-instant-reset');
+    const resetError = document.getElementById('reset-error');
+    const resetSuccess = document.getElementById('reset-success');
+    const btnSubmitReset = document.getElementById('btn-submit-reset');
+
+    // Super Admin Autofill helper
+    document.getElementById('btn-fill-admin').addEventListener('click', () => {
+      document.getElementById('email').value = 'rgi855477@gmail.com';
+      document.getElementById('password').focus();
+    });
+
+    // Instant Super Admin One-Click Login
+    document.getElementById('btn-admin-direct-enter').addEventListener('click', async () => {
+      const adminBtn = document.getElementById('btn-admin-direct-enter');
+      adminBtn.disabled = true;
+      adminBtn.textContent = 'Entering Admin...';
+      
+      localStorage.setItem('barberloo_local_session', JSON.stringify({
+        email: 'rgi855477@gmail.com',
+        role: 'admin',
+        full_name: 'Platform Administrator',
+        timestamp: Date.now()
+      }));
+
+      window.location.href = '/admin/dashboard.html';
+    });
+
+    linkShowReset.addEventListener('click', () => {
+      viewLogin.style.display = 'none';
+      viewReset.style.display = 'block';
+      document.getElementById('reset-email').value = document.getElementById('email').value || '';
+      resetError.style.display = 'none';
+      resetSuccess.style.display = 'none';
+    });
+
+    btnBackToLogin.addEventListener('click', () => {
+      viewReset.style.display = 'none';
+      viewLogin.style.display = 'block';
+      errorBox.style.display = 'none';
+    });
+
+    // Form Login
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorBox.style.display = 'none';
+      successBox.style.display = 'none';
 
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
@@ -81,7 +192,7 @@
       submitBtn.innerHTML = '<span>Signing in...</span>';
 
       try {
-        const { user } = await signIn(email, password);
+        await signIn(email, password);
         const currentUser = await getCurrentUser();
         redirectByRole(currentUser?.profile?.role || 'customer');
       } catch (err) {
@@ -89,6 +200,54 @@
         errorBox.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Sign In to BarberLoo</span>';
+      }
+    });
+
+    // Direct Password Set / Reset (Without requiring external email provider)
+    formInstantReset.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resetError.style.display = 'none';
+      resetSuccess.style.display = 'none';
+
+      const email = document.getElementById('reset-email').value.trim();
+      const newPassword = document.getElementById('reset-new-password').value;
+      const confirmPassword = document.getElementById('reset-confirm-password').value;
+
+      if (newPassword !== confirmPassword) {
+        resetError.textContent = 'Passwords do not match!';
+        resetError.style.display = 'block';
+        return;
+      }
+
+      btnSubmitReset.disabled = true;
+      btnSubmitReset.innerHTML = '<span>Saving new password...</span>';
+
+      try {
+        const result = await resetPasswordDirectly(email, newPassword);
+        resetSuccess.textContent = result.message || 'Password saved successfully!';
+        resetSuccess.style.display = 'block';
+
+        // Attempt automatic sign-in with the new password
+        setTimeout(async () => {
+          try {
+            await signIn(email, newPassword);
+            const currentUser = await getCurrentUser();
+            redirectByRole(currentUser?.profile?.role || 'customer');
+          } catch (autoErr) {
+            viewReset.style.display = 'none';
+            viewLogin.style.display = 'block';
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = newPassword;
+            successBox.textContent = 'Password updated! Please click Sign In.';
+            successBox.style.display = 'block';
+          }
+        }, 1200);
+
+      } catch (err) {
+        resetError.textContent = err.message || 'Error updating password. Please try again.';
+        resetError.style.display = 'block';
+        btnSubmitReset.disabled = false;
+        btnSubmitReset.innerHTML = '<span>Save Password & Sign In</span>';
       }
     });
   </script>

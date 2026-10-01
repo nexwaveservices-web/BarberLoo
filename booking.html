@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Appointment - BarberLoo</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background: radial-gradient(circle at top, #182234 0%, #0b0f17 100%);">
+<body style="background: var(--bg-main);">
 
   <header class="navbar">
     <div class="container nav-inner">
@@ -24,30 +27,30 @@
     </div>
   </header>
 
-  <main class="container" style="max-width: 640px; padding-top: 40px; padding-bottom: 64px;">
+  <main class="container" style="max-width: 620px; padding-top: 48px; padding-bottom: 64px;">
     
     <div style="margin-bottom: 24px;">
-      <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 4px;">Book an Appointment</h1>
-      <p style="color: var(--text-muted); font-size: 0.95rem;">Select your preferred date and time slot for guaranteed chair time.</p>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Reserve Appointment</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Select your preferred date and time slot for a guaranteed barber chair.</p>
     </div>
 
     <!-- Booking Summary Card -->
-    <div class="card" style="margin-bottom: 24px; background: var(--bg-card); border-left: 4px solid var(--primary);">
+    <div class="card" style="margin-bottom: 24px; background: #ffffff; border-radius: var(--radius-xl); border-left: 4px solid var(--primary); padding: 22px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Selected Service</span>
-          <h3 id="summary-service-name" style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-top: 2px;">Signature Precision Haircut</h3>
-          <p id="summary-shop-name" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;">The Golden Razor Lounge</p>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Selected Service</span>
+          <h3 id="summary-service-name" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-top: 2px;">Signature Precision Haircut</h3>
+          <p id="summary-shop-name" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 2px;">BarberLoo Heritage Lounge</p>
         </div>
         <div style="text-align: right;">
-          <div id="summary-price" style="font-size: 1.4rem; font-weight: 800; color: var(--primary);">$45.00</div>
-          <div id="summary-duration" style="font-size: 0.8rem; color: var(--text-muted);">30 mins</div>
+          <div id="summary-price" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">$45.00</div>
+          <div id="summary-duration" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">30 mins</div>
         </div>
       </div>
     </div>
 
     <!-- Form Wizard Card -->
-    <div class="card" style="box-shadow: var(--shadow-lg);">
+    <div class="card" style="box-shadow: var(--shadow-md); border-radius: var(--radius-xl); padding: 32px;">
       <form id="form-booking">
         
         <!-- Step 1: Select Date -->
@@ -57,21 +60,21 @@
         </div>
 
         <!-- Step 2: Time Slots Grid -->
-        <div class="form-group" style="margin-top: 20px;">
-          <label class="form-label">2. Select Time Slot</label>
-          <div id="slots-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 8px;">
+        <div class="form-group" style="margin-top: 24px;">
+          <label class="form-label">2. Select Available Slot</label>
+          <div id="slots-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; margin-top: 8px;">
             <!-- Generated dynamically -->
           </div>
           <input type="hidden" id="selected-slot" required>
         </div>
 
         <!-- Step 3: Special Notes -->
-        <div class="form-group" style="margin-top: 20px;">
-          <label class="form-label" for="notes">3. Haircut or Barber Notes (Optional)</label>
+        <div class="form-group" style="margin-top: 24px;">
+          <label class="form-label" for="notes">3. Haircut Instructions or Notes (Optional)</label>
           <textarea id="notes" class="form-textarea" rows="2" placeholder="e.g. Skin fade with textured top, scissor trim, sensitive skin"></textarea>
         </div>
 
-        <button type="submit" id="btn-submit-booking" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 24px;" disabled>
+        <button type="submit" id="btn-submit-booking" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 28px;" disabled>
           <span>Confirm & Reserve Appointment</span>
         </button>
       </form>
@@ -79,12 +82,13 @@
   </main>
 
   <script type="module">
+    import { apiClient } from '/js/api.js';
     import { getSupabase } from '/js/supabase.js';
     import { requireAuth, setupNavigation, showToast } from '/js/auth.js';
 
     let user = null;
     const urlParams = new URLSearchParams(window.location.search);
-    const shopId = urlParams.get('shop_id') || 'a1b2c3d4-e5f6-4a1b-8c2d-111111111111';
+    const shopId = urlParams.get('shop_id') || '00000000-0000-0000-0000-000000000001';
     const serviceId = urlParams.get('service_id') || 'srv-1';
 
     // Set minimum date to today
@@ -104,8 +108,8 @@
       const hiddenInput = document.getElementById('selected-slot');
       const submitBtn = document.getElementById('btn-submit-booking');
 
-      slotsContainer.innerHTML = availableSlots.map((slot, idx) => `
-        <button type="button" class="btn btn-outline btn-sm slot-btn" data-slot="${slot}" style="padding: 10px 4px; font-size: 0.85rem;">
+      slotsContainer.innerHTML = availableSlots.map(slot => `
+        <button type="button" class="btn btn-secondary btn-sm slot-btn" data-slot="${slot}" style="padding: 10px 4px; font-size: 0.85rem; border-radius: var(--radius-md);">
           ${slot}
         </button>
       `).join('');
@@ -114,11 +118,13 @@
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
           buttons.forEach(b => {
-            b.className = 'btn btn-outline btn-sm slot-btn';
-            b.style.borderColor = 'var(--border-strong)';
-            b.style.background = 'transparent';
+            b.className = 'btn btn-secondary btn-sm slot-btn';
+            b.style.background = 'var(--bg-subtle)';
+            b.style.color = 'var(--text-main)';
           });
           btn.className = 'btn btn-primary btn-sm slot-btn';
+          btn.style.background = 'var(--primary)';
+          btn.style.color = '#ffffff';
           hiddenInput.value = btn.dataset.slot;
           submitBtn.disabled = false;
         });
@@ -130,6 +136,25 @@
       if (!user) return;
 
       renderSlots();
+
+      // Fetch dynamic service & shop names
+      const sb = getSupabase();
+      if (sb) {
+        try {
+          const { data: srv } = await sb.from('services').select('name, price, duration').eq('id', serviceId).single();
+          if (srv) {
+            document.getElementById('summary-service-name').textContent = srv.name;
+            document.getElementById('summary-price').textContent = `$${Number(srv.price).toFixed(2)}`;
+            document.getElementById('summary-duration').textContent = `${srv.duration} mins`;
+          }
+          const { data: shop } = await sb.from('shops').select('name').eq('id', shopId).single();
+          if (shop) {
+            document.getElementById('summary-shop-name').textContent = shop.name;
+          }
+        } catch (e) {
+          console.warn('Real booking labels fetch completed:', e);
+        }
+      }
 
       document.getElementById('form-booking').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -146,21 +171,19 @@
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span>Reserving slot...</span>';
 
-        const sb = getSupabase();
-        if (sb) {
-          try {
-            await sb.from('bookings').insert({
-              shop_id: shopId,
-              customer_id: user.id,
-              service_id: serviceId,
-              booking_date: date,
-              booking_time: slot.replace(' AM', ':00').replace(' PM', ':00'),
-              status: 'confirmed',
-              notes: notes
-            });
-          } catch (err) {
-            console.warn('Simulating offline booking record', err);
-          }
+        try {
+          await apiClient.bookAppointment({
+            shop_id: shopId,
+            service_id: serviceId,
+            customer_id: user.id,
+            customer_name: user.profile?.full_name || 'Client',
+            customer_phone: user.profile?.phone || '',
+            date,
+            time_slot: slot,
+            notes
+          });
+        } catch (err) {
+          console.warn('Backend booking sync error:', err);
         }
 
         showToast('Appointment successfully reserved!', 'success');

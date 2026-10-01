@@ -3,14 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BarberLoo - Live Barber Queue & Appointment Platform</title>
-  <meta name="description" content="Discover premier barber shops, join live walk-in queues remotely, and book guaranteed appointment slots with BarberLoo.">
+  <title>BarberLoo - Premium Barber Appointments & Live Queue Platform</title>
+  <meta name="description" content="Discover premier barber shops, join live queues in real-time, and reserve appointments with guaranteed chair times.">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  <!-- Top Announcement Bar (Minimog Style) -->
+  <div class="announcement-bar">
+    <div class="inner">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>✂️</span>
+        <span>Zero Wait Lobby Guarantee • Real-time Live Queueing Active</span>
+      </div>
+      <div style="display: flex; gap: 18px; align-items: center;">
+        <span>⭐️ 4.95 Average Barber Rating</span>
+        <span>•</span>
+        <span>📍 Over 1,200+ Clients Served This Month</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary Navbar -->
   <header class="navbar">
     <div class="container nav-inner">
       <a href="/index.html" class="brand-logo">
@@ -19,8 +37,9 @@
       </a>
 
       <ul class="nav-links">
-        <li><a href="/customer/discover.html" class="nav-link">Find Barbers</a></li>
-        <li><a href="/login.html" class="nav-link">Live Queue</a></li>
+        <li><a href="/customer/discover.html" class="nav-link active">Find Barbers</a></li>
+        <li><a href="/customer/queue.html" class="nav-link">Live Queue</a></li>
+        <li><a href="/my-bookings.html" class="nav-link">My Bookings</a></li>
         <li><a href="/signup.html?role=barber" class="nav-link">For Barbershops</a></li>
       </ul>
 
@@ -30,125 +49,220 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section style="background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b0f17 100%); padding: 80px 0 64px 0; border-bottom: 1px solid var(--border-subtle); text-align: center;">
-    <div class="container" style="max-width: 860px;">
-      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.3); padding: 6px 16px; border-radius: var(--radius-full); color: var(--primary); font-size: 0.85rem; font-weight: 700; margin-bottom: 20px;">
-        <span>⚡ THE NEW STANDARD IN BARBERSHOP SCHEDULING</span>
-      </div>
-
-      <h1 style="font-size: 3.25rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 18px;">
-        Never Wait In A Crowded Lobby Again.
-      </h1>
-
-      <p style="color: var(--text-muted); font-size: 1.25rem; line-height: 1.6; margin-bottom: 36px;">
-        BarberLoo gives you live walk-in queues and real-time wait tracking from your phone. Or book ahead with top-rated neighborhood barbers.
-      </p>
-
-      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <a href="/customer/discover.html" class="btn btn-primary btn-lg" style="box-shadow: var(--shadow-glow);">
-          Explore Nearby Shops 💈
-        </a>
-        <a href="/signup.html?role=barber" class="btn btn-secondary btn-lg">
-          Register Your Barbershop ↗
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Key Value Props -->
-  <section class="container" style="padding: 64px 16px;">
-    <div style="text-align: center; margin-bottom: 48px;">
-      <h2 style="font-size: 2rem; font-weight: 800;">Built For Modern Hair Grooming</h2>
-      <p style="color: var(--text-muted); font-size: 1rem;">Seamless dual-channel booking for both walk-in regulars and planned appointments.</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+  <!-- Hero Section (Clean Minimalist E-Commerce Hero Style) -->
+  <section style="background: #ffffff; padding: 48px 0 64px 0; border-bottom: 1px solid var(--border-subtle);">
+    <div class="container" style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: center;">
       
-      <div class="card" style="padding: 32px;">
-        <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: rgba(217, 119, 6, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; color: var(--primary);">
-          ⚡
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); color: var(--primary); padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; margin-bottom: 16px;">
+          <span>★</span> MODERN GROOMING CONCIERGE
         </div>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Live Queue Tickets</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
-          Join the line remotely while you grab coffee. Track exact people ahead of you and get notified when your barber's chair is ready.
+
+        <h1 style="font-size: 3.25rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 18px; color: var(--text-main);">
+          Elevate Your Style with <span style="color: var(--primary);">Premier Barbers</span>
+        </h1>
+
+        <p style="color: var(--text-muted); font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; max-width: 520px;">
+          Discover handpicked neighborhood barbershops designed for craft, precision, and everyday confidence. Join a live queue remotely or reserve a guaranteed chair slot.
         </p>
+
+        <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+          <a href="/customer/discover.html" class="btn btn-primary btn-lg">
+            Explore Barbershops →
+          </a>
+          <a href="/signup.html?role=barber" class="btn btn-secondary btn-lg">
+            Register Shop
+          </a>
+        </div>
+
+        <!-- Trust Badges Row -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border-subtle);">
+          <div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Live Queue</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Track position from phone</div>
+          </div>
+          <div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Guaranteed</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">No double bookings</div>
+          </div>
+          <div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">24/7 Access</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Instant slot confirmation</div>
+          </div>
+        </div>
       </div>
 
-      <div class="card" style="padding: 32px;">
-        <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; color: #3b82f6;">
-          📅
+      <!-- Hero Visual Card & Product Highlight -->
+      <div style="position: relative;">
+        <div style="background: #f8f9fa; border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--border-subtle); padding: 18px; box-shadow: var(--shadow-md);">
+          <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1000&q=80" alt="Premier Grooming" style="width: 100%; height: 380px; object-fit: cover; border-radius: var(--radius-lg);">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding: 4px 6px;">
+            <div>
+              <span class="badge badge-open">Realtime Sync Active</span>
+              <h3 style="font-size: 1.15rem; font-weight: 700; margin-top: 6px;">BarberLoo Heritage Lounge</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">500 Howard Street, San Francisco</p>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">~15m</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Current Wait</div>
+            </div>
+          </div>
         </div>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Guaranteed Appointments</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
-          Lock in a specific haircut date and time slot in advance. Complete synchronization prevents double bookings and overlaps.
-        </p>
-      </div>
 
-      <div class="card" style="padding: 32px;">
-        <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; color: #10b981;">
-          💈
+        <!-- Floating Badge Chip -->
+        <div style="position: absolute; top: -14px; right: -14px; background: #ffffff; padding: 10px 18px; border-radius: var(--radius-full); box-shadow: var(--shadow-lg); border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px;">
+          <span style="color: #f59e0b; font-size: 1.1rem;">★</span>
+          <span style="font-weight: 700; font-size: 0.9rem;">4.95 Rating</span>
         </div>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Barber Operational Desk</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
-          Barbers control their queue chairs with one tap: Start Serving, Complete, Call Next, and auto-pace waiting times accurately.
-        </p>
       </div>
 
     </div>
   </section>
 
-  <!-- Featured Shops Spotlight -->
-  <section style="background: var(--bg-surface); padding: 64px 0; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+  <!-- Service Categories Grid (Inspired by Minimog "Shop by Category") -->
+  <section class="container" style="padding: 56px 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px;">
+      <div>
+        <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-main);">Browse by Treatment</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Select a specialty service to find certified barbers near you</p>
+      </div>
+      <a href="/customer/discover.html" style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">View all services →</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px;">
+      
+      <div class="category-pill active" onclick="window.location.href='/customer/discover.html?cat=fades'">
+        <div class="category-icon">💈</div>
+        <div class="category-title">Skin Fades</div>
+        <div class="category-count">18 Barbers</div>
+      </div>
+
+      <div class="category-pill" onclick="window.location.href='/customer/discover.html?cat=beards'">
+        <div class="category-icon">🧔🏻</div>
+        <div class="category-title">Beard Sculpt</div>
+        <div class="category-count">24 Barbers</div>
+      </div>
+
+      <div class="category-pill" onclick="window.location.href='/customer/discover.html?cat=shave'">
+        <div class="category-icon">🪒</div>
+        <div class="category-title">Hot Shaves</div>
+        <div class="category-count">12 Barbers</div>
+      </div>
+
+      <div class="category-pill" onclick="window.location.href='/customer/discover.html?cat=scissor'">
+        <div class="category-icon">✂️</div>
+        <div class="category-title">Scissor Cuts</div>
+        <div class="category-count">30 Barbers</div>
+      </div>
+
+      <div class="category-pill" onclick="window.location.href='/customer/discover.html?cat=styling'">
+        <div class="category-icon">🧴</div>
+        <div class="category-title">Scalp Spa</div>
+        <div class="category-count">9 Barbers</div>
+      </div>
+
+      <div class="category-pill" onclick="window.location.href='/customer/discover.html?cat=executive'">
+        <div class="category-icon">👑</div>
+        <div class="category-title">Executive Combo</div>
+        <div class="category-count">15 Barbers</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Live Featured Shops Spotlight (Clean Ecommerce Card Layout) -->
+  <section style="background: #ffffff; padding: 64px 0; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
     <div class="container">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
         <div>
-          <span class="badge badge-waiting" style="margin-bottom: 8px;">Featured Partners</span>
-          <h2 style="font-size: 1.85rem; font-weight: 800;">Top Rated Barbershops</h2>
+          <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main);">Trending Barbershops</h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">Verified partner shops with active real-time queueing</p>
         </div>
-        <a href="/customer/discover.html" class="btn btn-secondary btn-sm">View All Shops →</a>
+        <a href="/customer/discover.html" class="btn btn-secondary btn-sm">Explore All Shops →</a>
       </div>
 
       <div id="landing-featured-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-        <!-- Injected via script -->
+        <!-- Injected dynamically -->
       </div>
     </div>
   </section>
 
-  <!-- CTA Banner -->
-  <section class="container" style="padding: 80px 16px; text-align: center;">
-    <div class="card" style="padding: 48px 24px; background: radial-gradient(circle at top right, #1f2d45 0%, #111827 100%); border-color: rgba(217, 119, 6, 0.3);">
-      <h2 style="font-size: 2.25rem; font-weight: 800; margin-bottom: 12px;">Ready To Upgrade Your Barbershop Visit?</h2>
-      <p style="color: var(--text-muted); max-width: 560px; margin: 0 auto 28px auto; font-size: 1.05rem;">
-        Join thousands of clients and barbers already cutting down lobby clutter and maximizing chair productivity.
-      </p>
-      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-        <a href="/customer/discover.html" class="btn btn-primary btn-lg">Browse Shops Now</a>
-        <a href="/signup.html?role=barber" class="btn btn-outline btn-lg">Partner With Us</a>
+  <!-- Brand Trust & Perks Banner -->
+  <section class="container" style="padding: 56px 16px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; background: #ffffff; padding: 32px; border-radius: var(--radius-xl); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm); text-align: center;">
+      <div>
+        <div style="font-size: 2rem; margin-bottom: 8px;">⚡</div>
+        <h4 style="font-weight: 700; margin-bottom: 4px;">Remote Walk-Ins</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Hop into line from home, coffee shop, or office.</p>
+      </div>
+
+      <div>
+        <div style="font-size: 2rem; margin-bottom: 8px;">⏱</div>
+        <h4 style="font-weight: 700; margin-bottom: 4px;">Dynamic Wait Timing</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Accurately based on services ahead, not guesses.</p>
+      </div>
+
+      <div>
+        <div style="font-size: 2rem; margin-bottom: 8px;">🛡</div>
+        <h4 style="font-weight: 700; margin-bottom: 4px;">Verified Masters</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Licensed barbers with proven reviews & photos.</p>
+      </div>
+
+      <div>
+        <div style="font-size: 2rem; margin-bottom: 8px;">💳</div>
+        <h4 style="font-weight: 700; margin-bottom: 4px;">Instant Confirmation</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Real-time SMS & web ticket progression.</p>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Newsletter / Early Access Banner (Minimog Style) -->
+  <section class="container" style="padding-bottom: 64px;">
+    <div style="background: var(--bg-topbar); color: #ffffff; padding: 48px; border-radius: var(--radius-xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+      <div>
+        <h3 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 6px;">Stay Connected with Local Barbers</h3>
+        <p style="color: #a7f3d0; font-size: 0.95rem;">Receive special appointment slot alerts and off-peak discount passes.</p>
+      </div>
+
+      <div style="display: flex; gap: 10px; width: 100%; max-width: 420px;">
+        <input type="email" placeholder="Enter your email address" style="flex: 1; padding: 12px 18px; border-radius: var(--radius-full); border: none; outline: none; font-size: 0.925rem;">
+        <button class="btn btn-secondary" style="background: #ffffff; color: var(--primary); font-weight: 700; border: none;">Subscribe</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Minimal Footer -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-weight: 700; color: var(--text-main);">BarberLoo</span>
-        <span>© 2026 BarberLoo Inc. All rights reserved.</span>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="brand-icon" style="width: 28px; height: 28px; font-size: 0.9rem;">✂</div>
+        <span style="font-weight: 800; color: var(--text-main); font-size: 1.1rem;">BarberLoo</span>
+        <span style="color: var(--text-dim);">© 2026 BarberLoo Platform. All rights reserved.</span>
       </div>
-      <div>
-        <a href="/login.html" style="color: var(--text-muted); margin-right: 16px;">Log In</a>
-        <a href="/signup.html" style="color: var(--text-muted); margin-right: 16px;">Sign Up</a>
-        <a href="/admin/dashboard.html" style="color: var(--text-dim);">Admin Portal</a>
+
+      <div style="display: flex; gap: 20px;">
+        <a href="/customer/discover.html" style="color: var(--text-muted); font-size: 0.875rem;">Discover</a>
+        <a href="/login.html" style="color: var(--text-muted); font-size: 0.875rem;">Log In</a>
+        <a href="/signup.html?role=barber" style="color: var(--text-muted); font-size: 0.875rem;">Partner Program</a>
+        <a href="/admin/dashboard.html" style="color: var(--text-dim); font-size: 0.875rem;">Admin</a>
       </div>
     </div>
   </footer>
 
   <script type="module">
-    import { DEFAULT_SHOPS, renderShopCard } from '/js/discover.js';
+    import { fetchShops, renderShopCard } from '/js/discover.js';
     import { setupNavigation } from '/js/auth.js';
 
-    document.getElementById('landing-featured-grid').innerHTML = DEFAULT_SHOPS.map(shop => renderShopCard(shop)).join('');
+    async function loadLandingShops() {
+      const shops = await fetchShops('', 'all', false);
+      const grid = document.getElementById('landing-featured-grid');
+      if (grid && shops.length > 0) {
+        grid.innerHTML = shops.map(shop => renderShopCard(shop)).join('');
+      }
+    }
+
+    loadLandingShops();
     setupNavigation();
   </script>
 </body>

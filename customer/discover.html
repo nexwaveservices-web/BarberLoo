@@ -5,21 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Discover Barber Shops - BarberLoo</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- Top Announcement Strip -->
+  <div class="announcement-bar">
+    <div class="inner">
+      <div>⚡ Live Digital Queues Enabled Across All Partner Shops</div>
+      <div>Need assistance? Contact concierge 24/7</div>
+    </div>
+  </div>
+
+  <!-- Primary Navigation -->
   <header class="navbar">
     <div class="container nav-inner">
-      <a href="/customer/discover.html" class="brand-logo">
+      <a href="/index.html" class="brand-logo">
         <div class="brand-icon">✂</div>
         Barber<span class="accent">Loo</span>
       </a>
       <ul class="nav-links">
         <li><a href="/customer/discover.html" class="nav-link active">Explore Shops</a></li>
-        <li><a href="/my-bookings.html" class="nav-link">My Bookings</a></li>
         <li><a href="/customer/queue.html" class="nav-link">My Live Ticket</a></li>
+        <li><a href="/my-bookings.html" class="nav-link">My Bookings</a></li>
       </ul>
       <div class="nav-actions" id="nav-actions">
         <!-- Injected via auth.js -->
@@ -27,72 +38,82 @@
     </div>
   </header>
 
-  <!-- Hero Search & Filter Header -->
-  <section style="background: linear-gradient(180deg, #111827 0%, #0b0f17 100%); padding: 48px 0 32px 0; border-bottom: 1px solid var(--border-subtle);">
+  <!-- Filter & Discovery Header (Clean Minimog Storefront Search) -->
+  <section style="background: #ffffff; padding: 40px 0 32px 0; border-bottom: 1px solid var(--border-subtle);">
     <div class="container">
-      <div style="max-width: 760px; margin-bottom: 28px;">
-        <span class="badge badge-waiting" style="margin-bottom: 12px;">Live Wait Times & Online Booking</span>
-        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
-          Find Premier Barber Shops Near You
+      <div style="max-width: 680px; margin-bottom: 24px;">
+        <span class="badge badge-waiting" style="margin-bottom: 10px;">★ Handpicked Neighborhood Barbers</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 6px;">
+          Find & Queue With Master Barbers
         </h1>
-        <p style="color: var(--text-muted); font-size: 1.05rem;">
-          Skip the crowded lobby. Join a live queue remotely or reserve a guaranteed appointment slot.
+        <p style="color: var(--text-muted); font-size: 1rem;">
+          Track waiting line depth in real time or reserve an exact chair slot with no wait.
         </p>
       </div>
 
-      <!-- Search & Filters Container -->
-      <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 14px; background: var(--bg-card);">
+      <!-- Modern Search Box -->
+      <div class="card" style="padding: 14px 18px; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 14px;">
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <div style="flex: 2; min-width: 260px; position: relative;">
-            <input type="text" id="search-input" class="form-input" placeholder="Search by shop name, haircut type, or neighborhood..." style="padding-left: 38px;">
-            <span style="position: absolute; left: 14px; top: 12px; color: var(--text-dim);">🔍</span>
+          <div style="flex: 2; min-width: 240px; position: relative;">
+            <input type="text" id="search-input" class="form-input" placeholder="Search by shop name, fade style, or street (e.g. Lounge, Howard, Fade)..." style="border-radius: var(--radius-full); padding-left: 42px;">
+            <span style="position: absolute; left: 16px; top: 12px; color: var(--text-dim); font-size: 1.1rem;">🔍</span>
           </div>
 
-          <div style="flex: 1; min-width: 180px;">
-            <select id="filter-city" class="form-select">
-              <option value="all">All Cities</option>
+          <div style="flex: 1; min-width: 170px;">
+            <select id="filter-city" class="form-select" style="border-radius: var(--radius-full);">
+              <option value="all">All Locations</option>
               <option value="San Francisco">San Francisco, CA</option>
               <option value="Oakland">Oakland, CA</option>
             </select>
           </div>
 
-          <button id="btn-search" class="btn btn-primary" style="padding: 12px 24px;">
-            Search Shops
+          <button id="btn-search" class="btn btn-primary" style="padding: 12px 28px;">
+            Search Barbers
           </button>
         </div>
 
-        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-muted);">
+        <!-- Quick Filter Tags -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; padding: 2px 0;">
+          <button type="button" class="btn btn-secondary btn-sm tag-filter active" data-tag="" style="border-radius: var(--radius-full); font-size: 0.8rem; padding: 4px 12px;">All Shops</button>
+          <button type="button" class="btn btn-secondary btn-sm tag-filter" data-tag="Haircut" style="border-radius: var(--radius-full); font-size: 0.8rem; padding: 4px 12px;">Precision Haircuts</button>
+          <button type="button" class="btn btn-secondary btn-sm tag-filter" data-tag="Fade" style="border-radius: var(--radius-full); font-size: 0.8rem; padding: 4px 12px;">Skin Fades</button>
+          <button type="button" class="btn btn-secondary btn-sm tag-filter" data-tag="Beard" style="border-radius: var(--radius-full); font-size: 0.8rem; padding: 4px 12px;">Beard Sculpt</button>
+          <button type="button" class="btn btn-secondary btn-sm tag-filter" data-tag="Shave" style="border-radius: var(--radius-full); font-size: 0.8rem; padding: 4px 12px;">Hot Towel Shave</button>
+        </div>
+
+        <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-muted); padding: 0 4px;">
           <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
             <input type="checkbox" id="filter-open" checked style="accent-color: var(--primary);">
-            <span>Open Now Only</span>
+            <span style="font-weight: 600; color: var(--text-main);">Open Now Only</span>
           </label>
-          <span style="color: var(--border-strong);">|</span>
-          <span id="results-count" style="font-weight: 600; color: var(--text-main);">Showing shops...</span>
+          <span style="color: var(--border-strong);">•</span>
+          <span id="results-count" style="font-weight: 600; color: var(--primary);">Showing shops...</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Shops Grid Container -->
-  <main class="container" style="padding-top: 36px; padding-bottom: 64px;">
-    <div id="shops-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+  <main class="container" style="padding-top: 40px; padding-bottom: 72px;">
+    <div id="shops-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 28px;">
       <!-- Skeletons while loading -->
-      <div class="card skeleton" style="height: 380px;"></div>
-      <div class="card skeleton" style="height: 380px;"></div>
-      <div class="card skeleton" style="height: 380px;"></div>
+      <div class="card skeleton" style="height: 400px; border-radius: var(--radius-xl);"></div>
+      <div class="card skeleton" style="height: 400px; border-radius: var(--radius-xl);"></div>
+      <div class="card skeleton" style="height: 400px; border-radius: var(--radius-xl);"></div>
     </div>
   </main>
 
-  <!-- Footer -->
+  <!-- Minimal Clean Footer -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-weight: 700; color: var(--text-main);">BarberLoo</span>
-        <span>© 2026 BarberLoo Inc. All rights reserved.</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="brand-icon" style="width: 28px; height: 28px; font-size: 0.85rem;">✂</div>
+        <span style="font-weight: 800; color: var(--text-main);">BarberLoo</span>
+        <span style="color: var(--text-dim);">© 2026 BarberLoo Inc.</span>
       </div>
       <div>
-        <a href="/login.html" style="color: var(--text-muted); margin-right: 16px;">Partner Login</a>
-        <a href="/signup.html?role=barber" style="color: var(--primary);">Register Your Shop</a>
+        <a href="/login.html" style="color: var(--text-muted); margin-right: 18px;">Barber Login</a>
+        <a href="/signup.html?role=barber" style="color: var(--primary); font-weight: 700;">Register Shop Storefront</a>
       </div>
     </div>
   </footer>
@@ -110,9 +131,9 @@
 
     async function loadShops() {
       grid.innerHTML = `
-        <div class="card skeleton" style="height: 380px;"></div>
-        <div class="card skeleton" style="height: 380px;"></div>
-        <div class="card skeleton" style="height: 380px;"></div>
+        <div class="card skeleton" style="height: 400px; border-radius: var(--radius-xl);"></div>
+        <div class="card skeleton" style="height: 400px; border-radius: var(--radius-xl);"></div>
+        <div class="card skeleton" style="height: 400px; border-radius: var(--radius-xl);"></div>
       `;
 
       const query = searchInput.value.trim();
@@ -136,7 +157,7 @@
         return;
       }
 
-      resultsCount.textContent = `${shops.length} shop${shops.length > 1 ? 's' : ''} available`;
+      resultsCount.textContent = `${shops.length} barber${shops.length > 1 ? 's' : ''} available`;
       grid.innerHTML = shops.map(shop => renderShopCard(shop)).join('');
     }
 
@@ -144,8 +165,32 @@
     btnSearch.addEventListener('click', loadShops);
     filterCity.addEventListener('change', loadShops);
     filterOpen.addEventListener('change', loadShops);
+
+    // Live search as user types
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadShops, 250);
+    });
+
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') loadShops();
+    });
+
+    // Tag button filters
+    document.querySelectorAll('.tag-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tag-filter').forEach(b => {
+          b.className = 'btn btn-secondary btn-sm tag-filter';
+          b.style.background = 'var(--bg-subtle)';
+          b.style.color = 'var(--text-main)';
+        });
+        btn.className = 'btn btn-primary btn-sm tag-filter';
+        btn.style.background = 'var(--primary)';
+        btn.style.color = '#ffffff';
+        searchInput.value = btn.dataset.tag;
+        loadShops();
+      });
     });
 
     loadShops();
