@@ -30,10 +30,10 @@ get_header();
         </p>
 
         <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
-          <a href="<?php echo esc_url(home_url('/customer/discover.html')); ?>" class="btn btn-primary btn-lg">
+          <a href="<?php echo esc_url(home_url('/customer/discover')); ?>" class="btn btn-primary btn-lg">
             Explore Barbershops →
           </a>
-          <a href="<?php echo esc_url(home_url('/signup.html?role=barber')); ?>" class="btn btn-secondary btn-lg">
+          <a href="<?php echo esc_url(home_url('/signup')); ?>" class="btn btn-secondary btn-lg">
             Register Shop
           </a>
         </div>
@@ -140,7 +140,7 @@ get_header();
           <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--text-main);">Trending Barbershops</h2>
           <p style="color: var(--text-muted); font-size: 0.95rem;">Verified partner shops with active real-time queueing</p>
         </div>
-        <a href="<?php echo esc_url(home_url('/customer/discover.html')); ?>" class="btn btn-secondary btn-sm">Explore All Shops →</a>
+        <a href="<?php echo esc_url(home_url('/customer/discover')); ?>" class="btn btn-secondary btn-sm">Explore All Shops →</a>
       </div>
 
       <div id="landing-featured-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
@@ -158,7 +158,7 @@ get_header();
                 <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Live Wait</span>
                 <div style="font-size:1.1rem; font-weight:800; color:var(--primary);">~10 mins (2 in line)</div>
               </div>
-              <a href="<?php echo esc_url(home_url('/customer/shop-details.html?id=00000000-0000-0000-0000-000000000001')); ?>" class="btn btn-primary btn-sm">Enter Queue</a>
+              <a href="<?php echo esc_url(home_url('/customer/shop-details?id=00000000-0000-0000-0000-000000000001')); ?>" class="btn btn-primary btn-sm">Enter Queue</a>
             </div>
           </div>
         </div>
@@ -177,7 +177,7 @@ get_header();
                 <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Live Wait</span>
                 <div style="font-size:1.1rem; font-weight:800; color:var(--primary);">~25 mins (4 in line)</div>
               </div>
-              <a href="<?php echo esc_url(home_url('/customer/shop-details.html?id=00000000-0000-0000-0000-000000000002')); ?>" class="btn btn-primary btn-sm">Enter Queue</a>
+              <a href="<?php echo esc_url(home_url('/customer/shop-details?id=00000000-0000-0000-0000-000000000002')); ?>" class="btn btn-primary btn-sm">Enter Queue</a>
             </div>
           </div>
         </div>
@@ -196,7 +196,7 @@ get_header();
                 <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Live Wait</span>
                 <div style="font-size:1.1rem; font-weight:800; color:var(--primary);">No Wait (Chair Open)</div>
               </div>
-              <a href="<?php echo esc_url(home_url('/customer/shop-details.html?id=00000000-0000-0000-0000-000000000003')); ?>" class="btn btn-primary btn-sm">Enter Queue</a>
+              <a href="<?php echo esc_url(home_url('/customer/shop-details?id=00000000-0000-0000-0000-000000000003')); ?>" class="btn btn-primary btn-sm">Enter Queue</a>
             </div>
           </div>
         </div>

@@ -47,15 +47,15 @@ if (!defined('ABSPATH')) {
       </a>
 
       <ul class="nav-links">
-        <li><a href="<?php echo esc_url(home_url('/customer/discover.html')); ?>" class="nav-link">Find Barbers</a></li>
-        <li><a href="<?php echo esc_url(home_url('/customer/queue.html')); ?>" class="nav-link">Live Queue</a></li>
-        <li><a href="<?php echo esc_url(home_url('/my-bookings.html')); ?>" class="nav-link">My Bookings</a></li>
-        <li><a href="<?php echo esc_url(home_url('/signup.html?role=barber')); ?>" class="nav-link">For Barbershops</a></li>
+        <li><a href="<?php echo esc_url(home_url('/customer/discover')); ?>" class="nav-link">Find Barbers</a></li>
+        <li><a href="<?php echo esc_url(home_url('/customer/queue')); ?>" class="nav-link">Live Queue</a></li>
+        <li><a href="<?php echo esc_url(home_url('/my-bookings')); ?>" class="nav-link">My Bookings</a></li>
+        <li><a href="<?php echo esc_url(home_url('/barber/dashboard')); ?>" class="nav-link">For Barbershops</a></li>
       </ul>
 
       <div class="nav-actions">
-        <a href="<?php echo esc_url(home_url('/login.html')); ?>" class="btn btn-secondary btn-sm">Sign In</a>
-        <a href="<?php echo esc_url(home_url('/customer/discover.html')); ?>" class="btn btn-primary btn-sm">Book Chair</a>
+        <a href="<?php echo esc_url(home_url('/login')); ?>" class="btn btn-secondary btn-sm">Sign In</a>
+        <a href="<?php echo esc_url(home_url('/customer/discover')); ?>" class="btn btn-primary btn-sm">Book Chair</a>
       </div>
     </div>
   </header>

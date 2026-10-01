@@ -19,10 +19,10 @@ if (!defined('ABSPATH')) {
       </div>
 
       <div style="display: flex; gap: 20px;">
-        <a href="<?php echo esc_url(home_url('/customer/discover.html')); ?>" style="color: var(--text-muted); font-size: 0.875rem;">Discover</a>
-        <a href="<?php echo esc_url(home_url('/login.html')); ?>" style="color: var(--text-muted); font-size: 0.875rem;">Log In</a>
-        <a href="<?php echo esc_url(home_url('/signup.html?role=barber')); ?>" style="color: var(--text-muted); font-size: 0.875rem;">Partner Program</a>
-        <a href="<?php echo esc_url(home_url('/admin/dashboard.html')); ?>" style="color: var(--text-dim); font-size: 0.875rem;">Admin</a>
+        <a href="<?php echo esc_url(home_url('/customer/discover')); ?>" style="color: var(--text-muted); font-size: 0.875rem;">Discover</a>
+        <a href="<?php echo esc_url(home_url('/login')); ?>" style="color: var(--text-muted); font-size: 0.875rem;">Log In</a>
+        <a href="<?php echo esc_url(home_url('/barber/dashboard')); ?>" style="color: var(--text-muted); font-size: 0.875rem;">Barber Hub</a>
+        <a href="<?php echo esc_url(home_url('/admin/dashboard')); ?>" style="color: var(--text-dim); font-size: 0.875rem;">Admin</a>
       </div>
     </div>
   </footer>
