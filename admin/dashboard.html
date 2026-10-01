@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Control Center - BarberLoo</title>
+  <title>Admin Super Control Center - BarberLoo</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
         <a href="/admin/dashboard.html" class="brand-logo">
           <div class="brand-icon" style="background: var(--primary);">🛡</div>
           Barber<span class="accent">Loo</span>
-          <span style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px; font-weight: 700;">ADMIN</span>
+          <span style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: var(--radius-sm); margin-left: 8px; font-weight: 700;">SUPER ADMIN</span>
         </a>
       </div>
 
@@ -29,76 +29,130 @@
     </div>
   </header>
 
-  <main class="container" style="padding-top: 40px; padding-bottom: 64px;">
+  <main class="container" style="padding-top: 40px; padding-bottom: 80px;">
     
-    <div style="margin-bottom: 28px;">
-      <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">Platform Administration</h1>
-      <p style="color: var(--text-muted); font-size: 0.95rem;">Monitor platform health, verify newly onboarded barbershops, and view volume metrics.</p>
-    </div>
-
-    <!-- Platform Stats -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
-      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">TOTAL REGISTERED SHOPS</span>
-        <div id="stat-shops-count" style="font-size: 2.4rem; font-weight: 800; color: var(--primary); margin-top: 6px;">--</div>
-        <div style="font-size: 0.8rem; color: #059669; margin-top: 4px; font-weight: 600;">Live in database</div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 14px;">
+      <div>
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-main);">Platform Control & Financial Command</h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Manage shop licenses, oversee all financial transactions, configure platform fees, and issue coupon codes.</p>
       </div>
-
-      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">ACTIVE PROFILES</span>
-        <div id="stat-users-count" style="font-size: 2.4rem; font-weight: 800; color: #2563eb; margin-top: 6px;">--</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Registered users</div>
-      </div>
-
-      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">QUEUES GENERATED</span>
-        <div id="stat-queue-count" style="font-size: 2.4rem; font-weight: 800; color: #059669; margin-top: 6px;">--</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Total tickets</div>
-      </div>
-
-      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff;">
-        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">PLATFORM STATUS</span>
-        <div style="font-size: 2.4rem; font-weight: 800; color: var(--primary); margin-top: 6px;">ONLINE</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Supabase PostgreSQL 15+</div>
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-refresh-stats" class="btn btn-outline btn-sm">🔄 Refresh Data</button>
       </div>
     </div>
 
-    <!-- WP Pusher Integration Card -->
-    <div class="card" style="margin-bottom: 32px; border-radius: var(--radius-xl); background: #ffffff; border: 1px solid #bfdbfe; padding: 24px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #2563eb;">
-            🚀
-          </div>
+    <!-- Master Financial Summary KPI Row -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 32px;">
+      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">TOTAL TRANSACTION VOLUME</span>
+        <div id="stat-gross-volume" style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-top: 6px;">$0.00</div>
+        <div style="font-size: 0.8rem; color: #059669; margin-top: 4px; font-weight: 600;">Gross bookings processed</div>
+      </div>
+
+      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">PLATFORM FEE REVENUE</span>
+        <div id="stat-platform-revenue" style="font-size: 2.2rem; font-weight: 800; color: #166534; margin-top: 6px;">$0.00</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Earned platform fees</div>
+      </div>
+
+      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">BARBERS PAYOUT POOL</span>
+        <div id="stat-barber-payouts" style="font-size: 2.2rem; font-weight: 800; color: #2563eb; margin-top: 6px;">$0.00</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Net barber payouts</div>
+      </div>
+
+      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 24px;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">TOTAL SHOPS / QUEUES</span>
+        <div id="stat-total-counts" style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-top: 6px;">0 / 0</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Shops / Active queue tickets</div>
+      </div>
+    </div>
+
+    <!-- Platform Fee & Coupon Configuration Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+      
+      <!-- Platform Fee Manager Card -->
+      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0;">WP Pusher Live Bridge</h3>
-              <span id="wp-badge" class="badge badge-open">wppusher.js active</span>
-            </div>
-            <p style="font-size: 0.875rem; color: var(--text-muted); margin: 4px 0 0 0;">
-              Repository: <code id="wp-repo" style="color: #2563eb; font-weight: 600;">nexwaveservices-web/BarberLoo (main)</code> • Domain: <code style="color: #059669; font-weight: 600;">BarberLoo.in</code> • SDK: <code style="color: #4b5563;">/wppusher.js</code>
-            </p>
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Platform Fee Settings</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Fee added on top of barber prices on customer checkout</p>
           </div>
+          <span class="badge badge-open">Live Rules</span>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="btn-wp-test-deploy" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 6px;">
-            <span>⚡ Trigger WP Pusher Deploy</span>
+        <form id="form-platform-fees">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label class="form-label" for="input-fixed-fee">Fixed Fee ($)</label>
+              <input type="number" id="input-fixed-fee" class="form-input" min="0" step="0.5" value="3.00" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-percent-fee">Percentage Fee (%)</label>
+              <input type="number" id="input-percent-fee" class="form-input" min="0" max="50" step="0.5" value="5.0" required>
+            </div>
+          </div>
+
+          <div style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+            Example: For a $40 cut, customer pays $40 + $3 fixed + (5% of $40 = $2) = <strong>$45.00 total</strong>.
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 18px; width: 100%;">
+            Save Platform Fee Rates
           </button>
+        </form>
+      </div>
+
+      <!-- Coupon Codes Generator Card -->
+      <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; padding: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Create Promo / Coupon</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Generate discount codes for promotional campaigns</p>
+          </div>
+          <span class="badge" style="background: #eff6ff; color: #2563eb; font-weight: 700;">Promotions</span>
+        </div>
+
+        <form id="form-create-coupon">
+          <div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px;">
+            <div>
+              <label class="form-label" for="coupon-code">Code</label>
+              <input type="text" id="coupon-code" class="form-input" placeholder="SUMMER20" required style="text-transform: uppercase;">
+            </div>
+            <div>
+              <label class="form-label" for="coupon-type">Type</label>
+              <select id="coupon-type" class="form-select">
+                <option value="percent">% Off</option>
+                <option value="fixed">$ Off</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="coupon-value">Value</label>
+              <input type="number" id="coupon-value" class="form-input" min="1" step="1" placeholder="10" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-secondary btn-sm" style="margin-top: 18px; width: 100%;">
+            + Issue New Coupon
+          </button>
+        </form>
+
+        <!-- Active coupons list -->
+        <div id="coupons-chip-container" style="margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px;">
+          <!-- Dynamically populated -->
         </div>
       </div>
 
-      <div id="wp-event-log" style="margin-top: 16px; background: var(--bg-subtle); padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
-        <span id="wp-event-text">Latest sync: Initialized wppusher.js bridge</span>
-        <span id="wp-event-time" style="color: var(--text-muted); font-size: 0.8rem;">Just now</span>
-      </div>
     </div>
 
-    <!-- Registered Shops Table -->
-    <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-xl); background: #ffffff;">
-      <div style="padding: 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Partner Barber Shops</h3>
-        <span class="badge badge-open">Realtime sync</span>
+    <!-- Shop Licensing & Overall Reports Table -->
+    <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-xl); background: #ffffff; margin-bottom: 32px;">
+      <div style="padding: 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Barbershop License Control & Performance Reports</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Admin can suspend or reactivate any shop license from appearing on website or taking bookings</p>
+        </div>
+        <span class="badge badge-open">Realtime Governance</span>
       </div>
 
       <div style="overflow-x: auto;">
@@ -107,9 +161,11 @@
             <tr style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
               <th style="padding: 14px 16px;">Shop Name</th>
               <th style="padding: 14px 16px;">City</th>
-              <th style="padding: 14px 16px;">Rating</th>
-              <th style="padding: 14px 16px;">Status</th>
-              <th style="padding: 14px 16px; text-align: right;">Action</th>
+              <th style="padding: 14px 16px;">Bookings / Queue</th>
+              <th style="padding: 14px 16px;">Gross Revenue</th>
+              <th style="padding: 14px 16px;">Barber Net</th>
+              <th style="padding: 14px 16px;">License Status</th>
+              <th style="padding: 14px 16px; text-align: right;">License Action</th>
             </tr>
           </thead>
           <tbody id="admin-shops-tbody">
@@ -118,6 +174,67 @@
         </table>
       </div>
     </div>
+
+    <!-- Live Transactions Stream Table -->
+    <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-xl); background: #ffffff; margin-bottom: 32px;">
+      <div style="padding: 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">All Platform Financial Transactions</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Real-time payment logs with method, barber earnings, and platform fees</p>
+        </div>
+        <span class="badge" style="background: #f0fdf4; color: #166534; font-weight: 700;">Audited Ledger</span>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+          <thead>
+            <tr style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+              <th style="padding: 12px 16px;">Tx ID</th>
+              <th style="padding: 12px 16px;">Barbershop</th>
+              <th style="padding: 12px 16px;">Customer</th>
+              <th style="padding: 12px 16px;">Total Amount</th>
+              <th style="padding: 12px 16px;">Barber Earn</th>
+              <th style="padding: 12px 16px;">Platform Fee</th>
+              <th style="padding: 12px 16px;">Payment Method</th>
+              <th style="padding: 12px 16px;">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tx-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WP Pusher Integration Card -->
+    <div class="card" style="border-radius: var(--radius-xl); background: #ffffff; border: 1px solid #bfdbfe; padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #2563eb;">
+            🚀
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0;">WP Pusher Live Bridge</h3>
+              <span class="badge badge-open">wppusher.js active</span>
+            </div>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin: 4px 0 0 0;">
+              Repository: <code style="color: #2563eb; font-weight: 600;">nexwaveservices-web/BarberLoo (main)</code> • Domain: <code style="color: #059669; font-weight: 600;">BarberLoo.in</code>
+            </p>
+          </div>
+        </div>
+
+        <button id="btn-wp-test-deploy" class="btn btn-primary btn-sm">
+          <span>⚡ Trigger WP Pusher Deploy</span>
+        </button>
+      </div>
+
+      <div style="margin-top: 16px; background: var(--bg-subtle); padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
+        <span id="wp-event-text">Latest sync: Synchronized with GitHub repository</span>
+        <span id="wp-event-time" style="color: var(--text-muted); font-size: 0.8rem;">Just now</span>
+      </div>
+    </div>
+
   </main>
 
   <script type="module">
@@ -127,71 +244,201 @@
 
     document.getElementById('btn-logout').addEventListener('click', () => signOut());
 
-    async function init() {
-      const user = await requireAuth(['admin']);
-      if (!user) return;
-
-      // 1. Initialize WP Pusher Client SDK
-      try {
-        const wpStatus = await WPPusher.getStatus();
-        if (wpStatus && wpStatus.last_event) {
-          document.getElementById('wp-event-text').textContent = `Latest sync: ${wpStatus.last_event.message}`;
-          document.getElementById('wp-event-time').textContent = new Date(wpStatus.last_event.triggered_at).toLocaleTimeString();
-        }
-      } catch (err) {
-        console.warn('WPPusher initial status:', err);
-      }
-
-      // Listen for deploy button click
-      const deployBtn = document.getElementById('btn-wp-test-deploy');
-      deployBtn.addEventListener('click', async () => {
-        deployBtn.disabled = true;
-        deployBtn.innerHTML = '<span>🚀 Deploying via WP Pusher...</span>';
-        
-        try {
-          const res = await WPPusher.deploy({
-            repository: 'nexwaveservices-web/BarberLoo',
-            branch: 'main',
-            domain: 'BarberLoo.in',
-            triggered_by: user.email
-          });
-
-          showToast('WP Pusher: Deployment dispatched and verified!', 'success');
-          document.getElementById('wp-event-text').textContent = `Latest sync: ${res.deployment?.message || 'Deployment succeeded'}`;
-          document.getElementById('wp-event-time').textContent = new Date().toLocaleTimeString();
-        } catch (err) {
-          showToast(`WP Pusher: ${err.message}`, 'error');
-        } finally {
-          deployBtn.disabled = false;
-          deployBtn.innerHTML = '<span>⚡ Trigger WP Pusher Deploy</span>';
-        }
-      });
-
-      // 2. Load platform stats
+    async function loadData() {
       try {
         const stats = await apiClient.getAdminStats();
-        
-        document.getElementById('stat-shops-count').textContent = stats.total_shops || 0;
-        document.getElementById('stat-users-count').textContent = stats.total_users || 0;
-        document.getElementById('stat-queue-count').textContent = stats.total_queue_tickets || 0;
 
-        const tbody = document.getElementById('admin-shops-tbody');
-        if (stats.shops && stats.shops.length > 0) {
-          tbody.innerHTML = stats.shops.map(s => `
+        // 1. KPI Cards
+        document.getElementById('stat-gross-volume').textContent = `$${Number(stats.financials?.gross_volume || 0).toFixed(2)}`;
+        document.getElementById('stat-platform-revenue').textContent = `$${Number(stats.financials?.platform_revenue || 0).toFixed(2)}`;
+        document.getElementById('stat-barber-payouts').textContent = `$${Number(stats.financials?.barber_payouts || 0).toFixed(2)}`;
+        document.getElementById('stat-total-counts').textContent = `${stats.total_shops || 0} / ${stats.total_queue_tickets || 0}`;
+
+        // 2. Platform fee inputs
+        if (stats.platform_settings) {
+          document.getElementById('input-fixed-fee').value = stats.platform_settings.platform_fee_fixed;
+          document.getElementById('input-percent-fee').value = stats.platform_settings.platform_fee_percent;
+        }
+
+        // 3. Coupons List
+        const couponsContainer = document.getElementById('coupons-chip-container');
+        if (stats.coupons && stats.coupons.length > 0) {
+          couponsContainer.innerHTML = stats.coupons.map(c => `
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--bg-subtle); border: 1px solid var(--border-subtle); padding: 6px 12px; border-radius: var(--radius-full); font-size: 0.85rem;">
+              <strong style="color: var(--primary);">${c.code}</strong>
+              <span style="color: var(--text-muted);">(${c.discount_type === 'percent' ? c.discount_value + '%' : '$' + c.discount_value})</span>
+              <span style="font-size: 0.75rem; background: #e5e7eb; padding: 2px 6px; border-radius: 10px;">${c.usage_count || 0} uses</span>
+              <button onclick="window.removeCoupon('${c.id}')" style="background: none; border: none; cursor: pointer; color: #dc2626; font-weight: bold; margin-left: 4px;">×</button>
+            </div>
+          `).join('');
+        } else {
+          couponsContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">No coupons active</span>';
+        }
+
+        // 4. Shop Reports & License Table
+        const shopsTbody = document.getElementById('admin-shops-tbody');
+        if (stats.shop_reports && stats.shop_reports.length > 0) {
+          shopsTbody.innerHTML = stats.shop_reports.map(s => {
+            const isSuspended = s.license_status === 'suspended' || s.is_licensed === false;
+            return `
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 16px; font-weight: 700; color: var(--text-main);">${s.name}</td>
+                <td style="padding: 16px; color: var(--text-muted);">${s.city}</td>
+                <td style="padding: 16px;"><strong>${s.total_bookings}</strong> appts / <strong>${s.total_queue_tickets}</strong> tickets</td>
+                <td style="padding: 16px; font-weight: 700; color: var(--primary);">$${s.gross_revenue.toFixed(2)}</td>
+                <td style="padding: 16px; font-weight: 700; color: #2563eb;">$${s.barber_net.toFixed(2)}</td>
+                <td style="padding: 16px;">
+                  <span class="badge ${isSuspended ? 'badge-closed' : 'badge-open'}">
+                    ${isSuspended ? 'SUSPENDED' : 'ACTIVE LICENSED'}
+                  </span>
+                </td>
+                <td style="padding: 16px; text-align: right;">
+                  ${isSuspended ? `
+                    <button class="btn btn-secondary btn-sm" onclick="window.toggleLicense('${s.id}', 'active', true)" style="color: #166534; border-color: #bbf7d0;">
+                      Reactivate License
+                    </button>
+                  ` : `
+                    <button class="btn btn-outline btn-sm" onclick="window.toggleLicense('${s.id}', 'suspended', false)" style="color: #dc2626; border-color: #fecaca;">
+                      Deactivate License 🚫
+                    </button>
+                  `}
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+        // 5. Transactions Table
+        const txTbody = document.getElementById('admin-tx-tbody');
+        if (stats.recent_transactions && stats.recent_transactions.length > 0) {
+          txTbody.innerHTML = stats.recent_transactions.map(t => `
             <tr style="border-bottom: 1px solid var(--border-subtle);">
-              <td style="padding: 16px; font-weight: 700; color: var(--text-main);">${s.name}</td>
-              <td style="padding: 16px; color: var(--text-muted);">${s.city}</td>
-              <td style="padding: 16px; color: #f59e0b; font-weight: 700;">★ ${Number(s.rating || 5.0).toFixed(2)}</td>
-              <td style="padding: 16px;"><span class="badge ${s.is_open ? 'badge-open' : 'badge-closed'}">${s.is_open ? 'Open' : 'Closed'}</span></td>
-              <td style="padding: 16px; text-align: right;">
-                <a href="/customer/shop-details.html?id=${s.id}" class="btn btn-secondary btn-sm" target="_blank">Inspect</a>
+              <td style="padding: 14px 16px; font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">${t.id.slice(-8)}</td>
+              <td style="padding: 14px 16px; font-weight: 600;">${t.shop_name}</td>
+              <td style="padding: 14px 16px;">${t.customer_name}</td>
+              <td style="padding: 14px 16px; font-weight: 800; color: var(--text-main);">$${Number(t.amount).toFixed(2)}</td>
+              <td style="padding: 14px 16px; color: #2563eb; font-weight: 700;">$${Number(t.barber_earning).toFixed(2)}</td>
+              <td style="padding: 14px 16px; color: #166534; font-weight: 700;">+$${Number(t.platform_fee).toFixed(2)}</td>
+              <td style="padding: 14px 16px;">
+                <span class="badge" style="background: var(--bg-subtle); text-transform: uppercase;">
+                  ${t.payment_method === 'upi' ? '📱 UPI' : t.payment_method === 'cash' ? '💵 Cash' : '💳 Card'}
+                </span>
+              </td>
+              <td style="padding: 14px 16px; color: var(--text-muted); font-size: 0.8rem;">
+                ${new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </td>
             </tr>
           `).join('');
+        } else {
+          txTbody.innerHTML = '<tr><td colspan="8" style="padding: 24px; text-align: center; color: var(--text-muted);">No transactions logged yet</td></tr>';
         }
+
       } catch (err) {
-        console.warn('Admin stats fetch error:', err);
+        showToast('Error loading admin analytics', 'error');
       }
+    }
+
+    // License Toggle Action
+    window.toggleLicense = async function(shopId, status, isLicensed) {
+      const confirmMsg = isLicensed 
+        ? 'Reactivate this barbershop license so it appears on storefront & takes clients?'
+        : 'Are you sure you want to deactivate and suspend this shop license? It will be removed from customer booking.';
+      
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        await apiClient.toggleShopLicense(shopId, status, isLicensed);
+        showToast(`Shop license status changed to ${status.toUpperCase()}`, 'success');
+        loadData();
+      } catch (err) {
+        showToast('Failed to update shop license', 'error');
+      }
+    };
+
+    // Remove Coupon Action
+    window.removeCoupon = async function(id) {
+      if (!confirm('Delete this coupon?')) return;
+      try {
+        await apiClient.deleteCoupon(id);
+        showToast('Coupon removed', 'info');
+        loadData();
+      } catch (err) {
+        showToast('Error removing coupon', 'error');
+      }
+    };
+
+    // Save platform fee rates
+    document.getElementById('form-platform-fees').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fixedFee = Number(document.getElementById('input-fixed-fee').value);
+      const percentFee = Number(document.getElementById('input-percent-fee').value);
+
+      try {
+        await apiClient.updatePlatformFees(fixedFee, percentFee, true);
+        showToast('Platform fee rates updated!', 'success');
+        loadData();
+      } catch (err) {
+        showToast('Error saving fees', 'error');
+      }
+    });
+
+    // Create new coupon
+    document.getElementById('form-create-coupon').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('coupon-code').value.trim();
+      const type = document.getElementById('coupon-type').value;
+      const value = Number(document.getElementById('coupon-value').value);
+
+      try {
+        await apiClient.saveCoupon({
+          code,
+          discount_type: type,
+          discount_value: value,
+          is_active: true
+        });
+        showToast(`Coupon ${code} created!`, 'success');
+        document.getElementById('form-create-coupon').reset();
+        loadData();
+      } catch (err) {
+        showToast('Error creating coupon', 'error');
+      }
+    });
+
+    // Refresh button
+    document.getElementById('btn-refresh-stats').addEventListener('click', () => {
+      loadData();
+      showToast('Data refreshed', 'info');
+    });
+
+    // WP Pusher trigger
+    document.getElementById('btn-wp-test-deploy').addEventListener('click', async () => {
+      const deployBtn = document.getElementById('btn-wp-test-deploy');
+      deployBtn.disabled = true;
+      deployBtn.innerHTML = '<span>🚀 Deploying via WP Pusher...</span>';
+      
+      try {
+        const res = await WPPusher.deploy({
+          repository: 'nexwaveservices-web/BarberLoo',
+          branch: 'main',
+          domain: 'BarberLoo.in',
+          triggered_by: 'Platform Administrator'
+        });
+
+        showToast('WP Pusher: Deployment verified!', 'success');
+        document.getElementById('wp-event-text').textContent = `Latest sync: ${res.deployment?.message || 'Deployment succeeded'}`;
+        document.getElementById('wp-event-time').textContent = new Date().toLocaleTimeString();
+      } catch (err) {
+        showToast(`WP Pusher: ${err.message}`, 'error');
+      } finally {
+        deployBtn.disabled = false;
+        deployBtn.innerHTML = '<span>⚡ Trigger WP Pusher Deploy</span>';
+      }
+    });
+
+    async function init() {
+      const user = await requireAuth(['admin']);
+      if (!user) return;
+      loadData();
     }
 
     init();

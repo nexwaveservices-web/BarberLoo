@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Services - BarberLoo PRO</title>
+  <title>Manage Services & Pricing - BarberLoo PRO</title>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,18 +31,33 @@
       </div>
 
       <div class="nav-actions">
-        <button id="btn-add-service" class="btn btn-primary btn-sm">+ Add New Treatment</button>
+        <button id="btn-open-modal" class="btn btn-primary btn-sm">+ Add New Treatment</button>
         <button id="btn-logout" class="btn btn-outline btn-sm">Sign Out</button>
       </div>
     </div>
   </header>
 
-  <main class="container" style="max-width: 900px; padding-top: 40px; padding-bottom: 64px;">
+  <main class="container" style="max-width: 960px; padding-top: 40px; padding-bottom: 64px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
       <div>
         <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">Treatments & Pricing Menu</h1>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Configure the treatments and cuts customers can queue for and book online.</p>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+          Configure your service prices. Customer checkout price = <strong>Your Price + Platform Fee</strong>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Pricing Explainer Card -->
+    <div class="card" style="margin-bottom: 24px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-xl); padding: 18px 24px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.5rem;">💡</span>
+        <div>
+          <strong style="color: #166534; font-size: 0.95rem;">Transparent Pricing Formula:</strong>
+          <p style="color: #15803d; font-size: 0.875rem; margin: 2px 0 0 0;">
+            You set your exact barber payout. Customers see the itemized total including the platform fee at checkout. You receive 100% of your listed rate.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -50,135 +65,182 @@
     <div id="services-grid" style="display: flex; flex-direction: column; gap: 16px;">
       <!-- Populated via script -->
     </div>
+
+    <!-- Service Add/Edit Modal -->
+    <div id="service-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+      <div class="card" style="width: 100%; max-width: 500px; background: #ffffff; border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-xl);">
+        <h2 id="modal-title" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;">Add New Treatment</h2>
+
+        <form id="form-service">
+          <input type="hidden" id="service-id">
+
+          <div class="form-group">
+            <label class="form-label" for="service-name">Service / Treatment Name</label>
+            <input type="text" id="service-name" class="form-input" placeholder="e.g. Skin Fade & Beard Sculpt" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="service-desc">Description</label>
+            <textarea id="service-desc" class="form-textarea" rows="2" placeholder="e.g. Scissor work, foil shaver blend, warm hot towel finish..."></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" for="service-price">Your Barber Price ($)</label>
+              <input type="number" id="service-price" class="form-input" min="5" step="1" placeholder="40.00" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="service-duration">Duration (Minutes)</label>
+              <input type="number" id="service-duration" class="form-input" min="10" step="5" placeholder="30" required>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Treatment</button>
+            <button type="button" id="btn-close-modal" class="btn btn-outline" style="flex: 1;">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </main>
 
   <script type="module">
-    import { getSupabase } from '/js/supabase.js';
+    import { apiClient } from '/js/api.js';
     import { requireAuth, signOut, showToast } from '/js/auth.js';
 
     let services = [];
     let user = null;
-    let shopId = null;
+    let currentShop = null;
 
     async function loadServices() {
-      const sb = getSupabase();
-      if (sb) {
-        try {
-          const { data: shop } = await sb.from('shops').select('id').eq('owner_id', user.id).single();
-          if (shop) {
-            shopId = shop.id;
-            const { data: dbServices } = await sb.from('services').select('*').eq('shop_id', shop.id);
-            if (dbServices && dbServices.length > 0) {
-              services = dbServices;
-              renderServices();
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('Real services check completed:', e);
+      try {
+        currentShop = await apiClient.getBarberShop(user.id);
+        if (currentShop) {
+          const shopDetails = await apiClient.getShop(currentShop.id);
+          services = shopDetails.services || [];
+          renderServices();
         }
+      } catch (err) {
+        console.warn('Load services fallback:', err);
       }
-
-      services = [
-        { id: 'srv-demo-1', name: 'Signature Precision Haircut (Sandbox Test)', description: 'Consultation, precision scissor & clipper cut, neck shave finish.', price: 45.00, duration: 30, is_active: true }
-      ];
-      renderServices();
     }
 
     function renderServices() {
       const container = document.getElementById('services-grid');
-      container.innerHTML = services.map(srv => `
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 24px; border-radius: var(--radius-xl); background: #ffffff;">
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-              <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">${srv.name}</h3>
-              <span class="badge ${srv.is_active ? 'badge-open' : 'badge-closed'}">${srv.is_active ? 'Active' : 'Inactive'}</span>
-              <span class="badge" style="background: var(--bg-subtle); color: var(--text-muted);">${srv.duration} mins</span>
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 6px;">${srv.description}</p>
-            <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">$${Number(srv.price).toFixed(2)}</div>
+      if (services.length === 0) {
+        container.innerHTML = `
+          <div class="card" style="text-align: center; padding: 40px; background: #ffffff; border-radius: var(--radius-xl);">
+            <div style="font-size: 2rem; margin-bottom: 8px;">✂️</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700;">No treatments listed yet</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Click "+ Add New Treatment" above to create your haircut and grooming menu.</p>
           </div>
+        `;
+        return;
+      }
 
-          <div style="display: flex; gap: 10px;">
-            <button class="btn btn-outline btn-sm" onclick="window.toggleService('${srv.id}')">
-              ${srv.is_active ? 'Deactivate' : 'Activate'}
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="window.editService('${srv.id}')">
-              Edit Price
-            </button>
+      container.innerHTML = services.map(srv => {
+        const barberPrice = Number(srv.barber_price || srv.price || 40);
+        const platformFee = Number(srv.platform_fee || 5.00);
+        const finalPrice = Number(srv.final_price || (barberPrice + platformFee));
+
+        return `
+          <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 24px; border-radius: var(--radius-xl); background: #ffffff; border: 1px solid var(--border-subtle);">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">${srv.name}</h3>
+                <span class="badge ${srv.is_active !== false ? 'badge-open' : 'badge-closed'}">${srv.is_active !== false ? 'Active' : 'Inactive'}</span>
+                <span class="badge" style="background: var(--bg-subtle); color: var(--text-muted);">⏱ ${srv.duration} mins</span>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 10px;">${srv.description || 'Precision grooming treatment'}</p>
+              
+              <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;">
+                <div>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">YOUR EARNING:</span>
+                  <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary);"> $${barberPrice.toFixed(2)}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                  + Platform Fee: <span style="font-weight: 600;">$${platformFee.toFixed(2)}</span>
+                </div>
+                <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); background: var(--bg-subtle); padding: 4px 10px; border-radius: var(--radius-full);">
+                  Customer Pays: $${finalPrice.toFixed(2)}
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-shrink: 0;">
+              <button class="btn btn-secondary btn-sm" onclick="window.openEditService('${srv.id}')">
+                Edit
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="window.deleteService('${srv.id}')" style="color: #dc2626; border-color: #fecaca;">
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    window.toggleService = async function(id) {
-      const srv = services.find(s => s.id === id);
-      if (srv) {
-        srv.is_active = !srv.is_active;
-        const sb = getSupabase();
-        if (sb && !id.startsWith('srv-demo')) {
-          await sb.from('services').update({ is_active: srv.is_active }).eq('id', id);
-        }
-        showToast(`Treatment "${srv.name}" ${srv.is_active ? 'activated' : 'deactivated'}`, 'info');
-        renderServices();
-      }
-    };
+    // Modal controls
+    const modal = document.getElementById('service-modal');
+    document.getElementById('btn-open-modal').addEventListener('click', () => {
+      document.getElementById('modal-title').textContent = 'Add New Treatment';
+      document.getElementById('form-service').reset();
+      document.getElementById('service-id').value = '';
+      modal.style.display = 'flex';
+    });
 
-    window.editService = async function(id) {
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    window.openEditService = function(id) {
       const srv = services.find(s => s.id === id);
       if (!srv) return;
-      const newPrice = prompt(`Update price for ${srv.name}:`, srv.price);
-      if (newPrice !== null && !isNaN(Number(newPrice))) {
-        srv.price = Number(newPrice);
-        const sb = getSupabase();
-        if (sb && !id.startsWith('srv-demo')) {
-          await sb.from('services').update({ price: srv.price }).eq('id', id);
-        }
-        showToast('Price updated', 'success');
-        renderServices();
+      document.getElementById('modal-title').textContent = 'Edit Treatment';
+      document.getElementById('service-id').value = srv.id;
+      document.getElementById('service-name').value = srv.name;
+      document.getElementById('service-desc').value = srv.description || '';
+      document.getElementById('service-price').value = srv.barber_price || srv.price;
+      document.getElementById('service-duration').value = srv.duration;
+      modal.style.display = 'flex';
+    };
+
+    window.deleteService = async function(id) {
+      if (!confirm('Are you sure you want to remove this service from your menu?')) return;
+      try {
+        await apiClient.deleteService(id);
+        showToast('Treatment removed', 'info');
+        loadServices();
+      } catch (err) {
+        showToast('Error deleting service', 'error');
       }
     };
 
-    document.getElementById('btn-add-service').addEventListener('click', async () => {
-      const name = prompt('Enter treatment name:');
-      if (!name) return;
-      const price = prompt('Enter treatment price ($):', '35.00');
-      const duration = prompt('Enter duration in minutes:', '30');
+    document.getElementById('form-service').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const srvId = document.getElementById('service-id').value;
+      const payload = {
+        shop_id: currentShop.id,
+        name: document.getElementById('service-name').value.trim(),
+        description: document.getElementById('service-desc').value.trim(),
+        price: Number(document.getElementById('service-price').value),
+        duration: Number(document.getElementById('service-duration').value)
+      };
 
-      const sb = getSupabase();
-      if (sb && shopId) {
-        try {
-          const { data, error } = await sb.from('services').insert({
-            shop_id: shopId,
-            name: name,
-            description: 'Professional barber treatment',
-            price: Number(price) || 35,
-            duration: Number(duration) || 30,
-            is_active: true
-          }).select().single();
-
-          if (!error && data) {
-            services.push(data);
-            showToast(`Added treatment: ${name}`, 'success');
-            renderServices();
-            return;
-          }
-        } catch (err) {
-          console.warn('Real service insert check:', err);
+      try {
+        if (srvId) {
+          await apiClient.updateService(srvId, payload);
+          showToast('Treatment updated successfully!', 'success');
+        } else {
+          await apiClient.addService(payload);
+          showToast('New treatment added to menu!', 'success');
         }
+        modal.style.display = 'none';
+        loadServices();
+      } catch (err) {
+        showToast(err.message || 'Failed saving treatment', 'error');
       }
-
-      services.push({
-        id: 'srv-' + Date.now(),
-        name,
-        description: 'Professional barber treatment',
-        price: Number(price) || 35,
-        duration: Number(duration) || 30,
-        is_active: true
-      });
-
-      showToast(`Added treatment: ${name}`, 'success');
-      renderServices();
     });
 
     document.getElementById('btn-logout').addEventListener('click', () => signOut());

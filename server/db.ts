@@ -28,6 +28,8 @@ export interface BarberShop {
   rating: number;
   total_reviews: number;
   is_open: boolean;
+  is_licensed: boolean; // Admin can toggle license/activation
+  license_status: 'active' | 'suspended' | 'pending';
   cover_url: string;
   logo_url: string;
   created_at: string;
@@ -38,8 +40,9 @@ export interface ServiceItem {
   shop_id: string;
   name: string;
   description: string;
-  price: number;
+  price: number; // Base barber price
   duration: number;
+  is_active?: boolean;
   created_at: string;
 }
 
@@ -70,10 +73,49 @@ export interface AppointmentEntry {
   time_slot: string;
   notes?: string;
   status: 'confirmed' | 'completed' | 'cancelled';
-  price: number;
+  barber_price: number;
+  platform_fee: number;
+  discount_amount: number;
+  total_paid: number;
   service_name: string;
   shop_name: string;
+  payment_method: 'card' | 'upi' | 'cash';
+  payment_status: 'paid' | 'pending_cash' | 'refunded';
+  coupon_code?: string;
   created_at: string;
+}
+
+export interface CouponCode {
+  id: string;
+  code: string;
+  discount_type: 'percent' | 'fixed';
+  discount_value: number;
+  min_order?: number;
+  max_discount?: number;
+  is_active: boolean;
+  usage_count: number;
+  created_at: string;
+}
+
+export interface TransactionRecord {
+  id: string;
+  appointment_id?: string;
+  shop_id: string;
+  shop_name: string;
+  customer_id: string;
+  customer_name: string;
+  amount: number;
+  barber_earning: number;
+  platform_fee: number;
+  payment_method: 'card' | 'upi' | 'cash';
+  payment_status: 'completed' | 'pending' | 'refunded';
+  created_at: string;
+}
+
+export interface PlatformSettings {
+  platform_fee_fixed: number; // e.g. $2.50 or flat fee
+  platform_fee_percent: number; // e.g. 5%
+  enable_coupons: boolean;
 }
 
 export interface DatabaseSchema {
@@ -82,9 +124,81 @@ export interface DatabaseSchema {
   services: ServiceItem[];
   queue: QueueEntry[];
   appointments: AppointmentEntry[];
+  coupons: CouponCode[];
+  transactions: TransactionRecord[];
+  settings: PlatformSettings;
 }
 
 const DEFAULT_DB: DatabaseSchema = {
+  settings: {
+    platform_fee_fixed: 3.00,
+    platform_fee_percent: 5.0,
+    enable_coupons: true
+  },
+  coupons: [
+    {
+      id: 'cpn-001',
+      code: 'WELCOME10',
+      discount_type: 'percent',
+      discount_value: 10,
+      is_active: true,
+      usage_count: 14,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'cpn-002',
+      code: 'BARBER5',
+      discount_type: 'fixed',
+      discount_value: 5,
+      is_active: true,
+      usage_count: 8,
+      created_at: new Date().toISOString()
+    }
+  ],
+  transactions: [
+    {
+      id: 'tx-001',
+      appointment_id: 'app-seed-01',
+      shop_id: '00000000-0000-0000-0000-000000000001',
+      shop_name: 'BarberLoo Heritage Lounge',
+      customer_id: 'cust-001',
+      customer_name: 'David Miller',
+      amount: 47.75,
+      barber_earning: 45.00,
+      platform_fee: 2.75,
+      payment_method: 'card',
+      payment_status: 'completed',
+      created_at: new Date(Date.now() - 3600000 * 4).toISOString()
+    },
+    {
+      id: 'tx-002',
+      appointment_id: 'app-seed-02',
+      shop_id: '00000000-0000-0000-0000-000000000001',
+      shop_name: 'BarberLoo Heritage Lounge',
+      customer_id: 'cust-002',
+      customer_name: 'Jordan Smith',
+      amount: 42.50,
+      barber_earning: 40.00,
+      platform_fee: 2.50,
+      payment_method: 'upi',
+      payment_status: 'completed',
+      created_at: new Date(Date.now() - 3600000 * 8).toISOString()
+    },
+    {
+      id: 'tx-003',
+      appointment_id: 'app-seed-03',
+      shop_id: 'shop-002',
+      shop_name: 'The Crown & Scissor',
+      customer_id: 'cust-003',
+      customer_name: 'Arthur Pendelton',
+      amount: 52.00,
+      barber_earning: 48.00,
+      platform_fee: 4.00,
+      payment_method: 'card',
+      payment_status: 'completed',
+      created_at: new Date(Date.now() - 3600000 * 24).toISOString()
+    }
+  ],
   users: [
     {
       id: 'admin-001',
@@ -126,6 +240,8 @@ const DEFAULT_DB: DatabaseSchema = {
       rating: 4.95,
       total_reviews: 48,
       is_open: true,
+      is_licensed: true,
+      license_status: 'active',
       cover_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
       logo_url: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=200&q=80',
       created_at: new Date().toISOString()
@@ -141,6 +257,8 @@ const DEFAULT_DB: DatabaseSchema = {
       rating: 4.92,
       total_reviews: 36,
       is_open: true,
+      is_licensed: true,
+      license_status: 'active',
       cover_url: 'https://images.unsplash.com/photo-1512690459411-b9245aed614b?auto=format&fit=crop&w=800&q=80',
       logo_url: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=200&q=80',
       created_at: new Date().toISOString()
@@ -154,6 +272,7 @@ const DEFAULT_DB: DatabaseSchema = {
       description: 'Tailored haircut with consultation, razor neck clean, wash, and premium clay finish.',
       price: 45,
       duration: 30,
+      is_active: true,
       created_at: new Date().toISOString()
     },
     {
@@ -163,6 +282,7 @@ const DEFAULT_DB: DatabaseSchema = {
       description: 'Pre-shave eucalyptus oil, 2 hot steam towels, lather massage, and ultra-smooth straight blade shave.',
       price: 40,
       duration: 30,
+      is_active: true,
       created_at: new Date().toISOString()
     },
     {
@@ -172,6 +292,7 @@ const DEFAULT_DB: DatabaseSchema = {
       description: 'Custom beard shaping, length fading, trimmer edge alignment, and warm balm treatment.',
       price: 28,
       duration: 20,
+      is_active: true,
       created_at: new Date().toISOString()
     },
     {
@@ -181,6 +302,7 @@ const DEFAULT_DB: DatabaseSchema = {
       description: 'Complete signature treatment: Precision cut, hot towel shave, beard oil, and facial tonic refresh.',
       price: 75,
       duration: 50,
+      is_active: true,
       created_at: new Date().toISOString()
     }
   ],
@@ -234,10 +356,17 @@ function ensureDbFile(): DatabaseSchema {
     const parsed = JSON.parse(raw);
     return {
       users: parsed.users || DEFAULT_DB.users,
-      shops: parsed.shops || DEFAULT_DB.shops,
+      shops: (parsed.shops || DEFAULT_DB.shops).map((s: BarberShop) => ({
+        ...s,
+        is_licensed: s.is_licensed !== false,
+        license_status: s.license_status || 'active'
+      })),
       services: parsed.services || DEFAULT_DB.services,
       queue: parsed.queue || DEFAULT_DB.queue,
-      appointments: parsed.appointments || DEFAULT_DB.appointments
+      appointments: parsed.appointments || DEFAULT_DB.appointments,
+      coupons: parsed.coupons || DEFAULT_DB.coupons,
+      transactions: parsed.transactions || DEFAULT_DB.transactions,
+      settings: parsed.settings || DEFAULT_DB.settings
     };
   } catch (err) {
     console.error('Failed reading DB file, recreating default:', err);

@@ -1,6 +1,16 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
-import { readDatabase, writeDatabase, UserProfile, BarberShop, ServiceItem, QueueEntry, AppointmentEntry } from './db.js';
+import {
+  readDatabase,
+  writeDatabase,
+  UserProfile,
+  BarberShop,
+  ServiceItem,
+  QueueEntry,
+  AppointmentEntry,
+  CouponCode,
+  TransactionRecord
+} from './db.js';
 
 export const apiRouter = Router();
 
@@ -22,7 +32,6 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
     // Check if user already exists
     const existing = db.users.find(u => u.email.toLowerCase() === normalizedEmail);
     if (existing) {
-      // If user exists and is admin email or requested role update
       return res.status(400).json({ error: 'An account with this email already exists. Please sign in or use another email.' });
     }
 
@@ -53,31 +62,37 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
         rating: 5.0,
         total_reviews: 1,
         is_open: true,
+        is_licensed: true,
+        license_status: 'active',
         cover_url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80',
         logo_url: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=200&q=80',
         created_at: new Date().toISOString()
       };
       db.shops.push(newShop);
 
-      // Add starter services
-      db.services.push({
-        id: 'srv_' + crypto.randomUUID(),
-        shop_id: newShop.id,
-        name: 'Standard Haircut',
-        description: 'Consultation, cut, taper, and styling.',
-        price: 40,
-        duration: 30,
-        created_at: new Date().toISOString()
-      });
-      db.services.push({
-        id: 'srv_' + crypto.randomUUID(),
-        shop_id: newShop.id,
-        name: 'Beard Trim & Lineup',
-        description: 'Hot towel and straight razor outline.',
-        price: 25,
-        duration: 20,
-        created_at: new Date().toISOString()
-      });
+      // Default baseline services
+      db.services.push(
+        {
+          id: 'srv_' + crypto.randomUUID(),
+          shop_id: newShop.id,
+          name: 'Classic Precision Cut',
+          description: 'Consultation, tailored cut, razor neck clean, wash & style.',
+          price: 40.00,
+          duration: 30,
+          is_active: true,
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 'srv_' + crypto.randomUUID(),
+          shop_id: newShop.id,
+          name: 'Beard Trim & Sculpt',
+          description: 'Custom beard shaping, length fading, razor line-up, and organic oil finish.',
+          price: 25.00,
+          duration: 20,
+          is_active: true,
+          created_at: new Date().toISOString()
+        }
+      );
     }
 
     writeDatabase(db);
@@ -90,7 +105,7 @@ apiRouter.post('/auth/register', (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error('Registration error:', err);
-    return res.status(500).json({ error: err.message || 'Server registration error' });
+    return res.status(500).json({ error: err.message || 'Registration failed' });
   }
 });
 
@@ -105,31 +120,7 @@ apiRouter.post('/auth/login', (req: Request, res: Response) => {
     const db = readDatabase();
     const normalizedEmail = String(email).trim().toLowerCase();
 
-    // Special auto-recovery for the designated platform admin
-    if (normalizedEmail === 'rgi855477@gmail.com') {
-      let admin = db.users.find(u => u.email.toLowerCase() === 'rgi855477@gmail.com');
-      if (!admin) {
-        admin = {
-          id: 'admin-001',
-          email: 'rgi855477@gmail.com',
-          password: password || 'admin123',
-          full_name: 'Platform Administrator',
-          phone: '+1 (415) 555-0199',
-          role: 'admin',
-          created_at: new Date().toISOString()
-        };
-        db.users.push(admin);
-        writeDatabase(db);
-      }
-
-      const { password: _, ...safeAdmin } = admin;
-      return res.json({
-        success: true,
-        user: safeAdmin,
-        message: 'Admin authentication granted.'
-      });
-    }
-
+    // Secure user lookup
     const user = db.users.find(u => u.email.toLowerCase() === normalizedEmail);
     if (!user) {
       return res.status(401).json({ error: 'No account found with this email. Please sign up first.' });
@@ -164,21 +155,7 @@ apiRouter.post('/auth/reset-password', (req: Request, res: Response) => {
     let user = db.users.find(u => u.email.toLowerCase() === normalizedEmail);
 
     if (!user) {
-      // Auto create if admin
-      if (normalizedEmail === 'rgi855477@gmail.com') {
-        user = {
-          id: 'admin-001',
-          email: normalizedEmail,
-          password: String(new_password),
-          full_name: 'Platform Administrator',
-          phone: '+1 (415) 555-0199',
-          role: 'admin',
-          created_at: new Date().toISOString()
-        };
-        db.users.push(user);
-      } else {
-        return res.status(404).json({ error: 'No user account found with that email address.' });
-      }
+      return res.status(404).json({ error: 'No user account found with that email address.' });
     } else {
       user.password = String(new_password);
     }
@@ -216,12 +193,17 @@ apiRouter.get('/auth/me', (req: Request, res: Response) => {
 // SHOPS & SERVICES
 // ========================
 
-// Get all shops (with optional city/search filter)
+// Get all shops (only licensed shops show on customer storefront unless include_inactive=true for admin)
 apiRouter.get('/shops', (req: Request, res: Response) => {
   const db = readDatabase();
-  const { city, search, open_only } = req.query;
+  const { city, search, open_only, include_suspended } = req.query;
 
   let results = [...db.shops];
+
+  // Storefront only shows active/licensed shops by default
+  if (include_suspended !== 'true') {
+    results = results.filter(s => s.is_licensed !== false && s.license_status !== 'suspended');
+  }
 
   if (open_only === 'true') {
     results = results.filter(s => s.is_open);
@@ -241,18 +223,30 @@ apiRouter.get('/shops', (req: Request, res: Response) => {
     );
   }
 
+  const platformSettings = db.settings || { platform_fee_fixed: 3.00, platform_fee_percent: 5.0, enable_coupons: true };
+
   // Attach services & wait times to each shop
   const enriched = results.map(shop => {
-    const shopServices = db.services.filter(srv => srv.shop_id === shop.id);
+    const shopServices = db.services.filter(srv => srv.shop_id === shop.id && srv.is_active !== false);
     const waitingInShop = db.queue.filter(q => q.shop_id === shop.id && (q.status === 'waiting' || q.status === 'serving'));
     
-    // Estimate wait: sum of serving + waiting duration or 15m default
     const totalMins = waitingInShop.reduce((acc, cur) => acc + (cur.service_duration || 25), 0);
 
     return {
       ...shop,
-      services: shopServices,
-      services_preview: shopServices.slice(0, 3).map(s => `${s.name} ($${s.price})`),
+      services: shopServices.map(srv => {
+        const fee = platformSettings.platform_fee_fixed + (srv.price * (platformSettings.platform_fee_percent / 100));
+        return {
+          ...srv,
+          barber_price: srv.price,
+          platform_fee: Number(fee.toFixed(2)),
+          final_price: Number((srv.price + fee).toFixed(2))
+        };
+      }),
+      services_preview: shopServices.slice(0, 3).map(s => {
+        const fee = platformSettings.platform_fee_fixed + (s.price * (platformSettings.platform_fee_percent / 100));
+        return `${s.name} ($${(s.price + fee).toFixed(2)})`;
+      }),
       waiting_count: waitingInShop.length,
       current_wait_mins: Math.max(10, totalMins || 15)
     };
@@ -270,18 +264,30 @@ apiRouter.get('/shops/:id', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Shop not found' });
   }
 
-  const services = db.services.filter(s => s.shop_id === shop.id);
+  const platformSettings = db.settings || { platform_fee_fixed: 3.00, platform_fee_percent: 5.0, enable_coupons: true };
+  const rawServices = db.services.filter(s => s.shop_id === shop.id);
   const queueItems = db.queue.filter(q => q.shop_id === shop.id && (q.status === 'waiting' || q.status === 'serving'));
+
+  const enrichedServices = rawServices.map(srv => {
+    const fee = platformSettings.platform_fee_fixed + (srv.price * (platformSettings.platform_fee_percent / 100));
+    return {
+      ...srv,
+      barber_price: srv.price,
+      platform_fee: Number(fee.toFixed(2)),
+      final_price: Number((srv.price + fee).toFixed(2))
+    };
+  });
 
   return res.json({
     ...shop,
-    services,
+    services: enrichedServices,
     waiting_count: queueItems.length,
-    current_wait_mins: Math.max(10, queueItems.length * 20)
+    current_wait_mins: Math.max(10, queueItems.length * 20),
+    platform_settings: platformSettings
   });
 });
 
-// Update shop details
+// Update shop details (Barber or Admin)
 apiRouter.put('/shops/:id', (req: Request, res: Response) => {
   const db = readDatabase();
   const shopIndex = db.shops.findIndex(s => s.id === req.params.id);
@@ -301,17 +307,46 @@ apiRouter.put('/shops/:id', (req: Request, res: Response) => {
   return res.json({ success: true, shop: updatedShop });
 });
 
+// Barber or Admin: Get barber's shop by owner ID
+apiRouter.get('/barber/shop', (req: Request, res: Response) => {
+  const ownerId = req.query.owner_id as string;
+  const db = readDatabase();
+
+  let shop = db.shops.find(s => s.owner_id === ownerId);
+  if (!shop && db.shops.length > 0) {
+    shop = db.shops[0];
+  }
+
+  if (!shop) {
+    return res.status(404).json({ error: 'No barbershop found' });
+  }
+
+  return res.json(shop);
+});
+
 // Get services for a shop
 apiRouter.get('/shops/:id/services', (req: Request, res: Response) => {
   const db = readDatabase();
+  const platformSettings = db.settings || { platform_fee_fixed: 3.00, platform_fee_percent: 5.0, enable_coupons: true };
   const services = db.services.filter(s => s.shop_id === req.params.id);
-  return res.json(services);
+
+  const enriched = services.map(srv => {
+    const fee = platformSettings.platform_fee_fixed + (srv.price * (platformSettings.platform_fee_percent / 100));
+    return {
+      ...srv,
+      barber_price: srv.price,
+      platform_fee: Number(fee.toFixed(2)),
+      final_price: Number((srv.price + fee).toFixed(2))
+    };
+  });
+
+  return res.json(enriched);
 });
 
-// Add service
+// Barber: Add or Edit service
 apiRouter.post('/services', (req: Request, res: Response) => {
-  const { shop_id, name, description, price, duration } = req.body;
-  if (!shop_id || !name || !price) {
+  const { shop_id, name, description, price, duration, is_active } = req.body;
+  if (!shop_id || !name || price === undefined) {
     return res.status(400).json({ error: 'Missing required service fields' });
   }
 
@@ -319,10 +354,11 @@ apiRouter.post('/services', (req: Request, res: Response) => {
   const newService: ServiceItem = {
     id: 'srv_' + crypto.randomUUID(),
     shop_id,
-    name,
+    name: String(name).trim(),
     description: description || '',
     price: Number(price),
     duration: Number(duration) || 30,
+    is_active: is_active !== false,
     created_at: new Date().toISOString()
   };
 
@@ -331,7 +367,25 @@ apiRouter.post('/services', (req: Request, res: Response) => {
   return res.json({ success: true, service: newService });
 });
 
-// Delete service
+// Barber: Update service
+apiRouter.put('/services/:id', (req: Request, res: Response) => {
+  const db = readDatabase();
+  const index = db.services.findIndex(s => s.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Service not found' });
+  }
+
+  db.services[index] = {
+    ...db.services[index],
+    ...req.body,
+    id: db.services[index].id
+  };
+
+  writeDatabase(db);
+  return res.json({ success: true, service: db.services[index] });
+});
+
+// Barber: Delete service
 apiRouter.delete('/services/:id', (req: Request, res: Response) => {
   const db = readDatabase();
   db.services = db.services.filter(s => s.id !== req.params.id);
@@ -340,149 +394,133 @@ apiRouter.delete('/services/:id', (req: Request, res: Response) => {
 });
 
 // ========================
-// LIVE QUEUE OPERATIONS
+// LIVE QUEUE
 // ========================
 
 // Join Queue
 apiRouter.post('/queue/join', (req: Request, res: Response) => {
-  try {
-    const { shop_id, service_id, customer_id, customer_name, customer_phone } = req.body;
-    if (!shop_id) {
-      return res.status(400).json({ error: 'Shop ID is required' });
-    }
+  const { shop_id, service_id, customer_id, customer_name, customer_phone } = req.body;
 
-    const db = readDatabase();
-    const shop = db.shops.find(s => s.id === shop_id) || db.shops[0];
-    const service = db.services.find(s => s.id === service_id) || db.services[0] || {
-      id: 'srv-default',
-      name: 'Precision Grooming',
-      duration: 30,
-      price: 45
-    };
-
-    // Calculate queue number
-    const shopQueue = db.queue.filter(q => q.shop_id === shop.id && (q.status === 'waiting' || q.status === 'serving'));
-    const maxNumber = shopQueue.reduce((max, cur) => Math.max(max, cur.queue_number), 0);
-    const nextNumber = (maxNumber % 99) + 1;
-
-    const peopleAhead = shopQueue.filter(q => q.status === 'waiting').length;
-    const estWait = Math.max(10, peopleAhead * (service.duration || 25));
-
-    const newTicket: QueueEntry = {
-      id: 'q_' + crypto.randomUUID(),
-      shop_id: shop.id,
-      service_id: service.id,
-      customer_id: customer_id || 'guest_' + crypto.randomUUID().slice(0, 6),
-      customer_name: customer_name || 'Valued Guest',
-      customer_phone: customer_phone || '',
-      service_name: service.name,
-      service_duration: service.duration,
-      queue_number: nextNumber,
-      status: 'waiting',
-      joined_at: new Date().toISOString(),
-      estimated_wait: estWait,
-      people_ahead: peopleAhead
-    };
-
-    db.queue.push(newTicket);
-    writeDatabase(db);
-
-    return res.json({
-      success: true,
-      ticket: {
-        ...newTicket,
-        shops: { name: shop.name },
-        services: { name: service.name, duration: service.duration }
-      }
-    });
-  } catch (err: any) {
-    return res.status(500).json({ error: err.message || 'Error joining queue' });
+  if (!shop_id) {
+    return res.status(400).json({ error: 'Shop ID is required' });
   }
+
+  const db = readDatabase();
+  const shop = db.shops.find(s => s.id === shop_id);
+  if (shop && (shop.is_licensed === false || shop.license_status === 'suspended')) {
+    return res.status(403).json({ error: 'This shop license is currently suspended by administration.' });
+  }
+
+  const activeShopId = shop?.id || db.shops[0].id;
+  const service = db.services.find(s => s.id === service_id) || db.services[0];
+
+  const existingInLine = db.queue.filter(q => q.shop_id === activeShopId && (q.status === 'waiting' || q.status === 'serving'));
+  const queueNum = existingInLine.length + 1;
+  const estWait = existingInLine.reduce((acc, cur) => acc + (cur.service_duration || 25), 0);
+
+  const newTicket: QueueEntry = {
+    id: 'tkt_' + crypto.randomUUID(),
+    shop_id: activeShopId,
+    service_id: service?.id || 'srv-001',
+    customer_id: customer_id || 'guest-' + Date.now(),
+    customer_name: customer_name || 'Walk-in Client',
+    customer_phone: customer_phone || '',
+    service_name: service?.name || 'Precision Cut',
+    service_duration: service?.duration || 30,
+    queue_number: queueNum,
+    status: 'waiting',
+    joined_at: new Date().toISOString(),
+    estimated_wait: estWait,
+    people_ahead: existingInLine.length
+  };
+
+  db.queue.push(newTicket);
+  writeDatabase(db);
+
+  return res.json({
+    success: true,
+    ticket: newTicket,
+    message: `You are in line! Ticket #${String(queueNum).padStart(2, '0')}`
+  });
 });
 
-// Get user active queue ticket
+// Active Ticket for Customer
 apiRouter.get('/queue/active', (req: Request, res: Response) => {
   const { customer_id } = req.query;
   const db = readDatabase();
 
-  const ticket = db.queue.find(q => 
+  if (!customer_id) {
+    return res.json(null);
+  }
+
+  const activeTicket = db.queue.find(q => 
     q.customer_id === customer_id && (q.status === 'waiting' || q.status === 'serving')
   );
 
-  if (!ticket) {
-    return res.json({ active: false });
+  if (!activeTicket) {
+    return res.json(null);
   }
 
-  const shop = db.shops.find(s => s.id === ticket.shop_id);
-  const service = db.services.find(s => s.id === ticket.service_id);
-
-  // Recalculate people ahead
-  const waitingAhead = db.queue.filter(q => 
-    q.shop_id === ticket.shop_id && 
-    q.status === 'waiting' && 
-    new Date(q.joined_at) < new Date(ticket.joined_at)
+  const ahead = db.queue.filter(q => 
+    q.shop_id === activeTicket.shop_id &&
+    q.status === 'waiting' &&
+    new Date(q.joined_at) < new Date(activeTicket.joined_at)
   ).length;
 
+  const currentWait = Math.max(0, ahead * (activeTicket.service_duration || 25));
+
   return res.json({
-    active: true,
-    ticket: {
-      ...ticket,
-      people_ahead: waitingAhead,
-      estimated_wait: Math.max(5, waitingAhead * 20),
-      shops: { name: shop?.name || 'BarberLoo Barbershop' },
-      services: { name: service?.name || ticket.service_name, duration: service?.duration || 30 }
-    }
+    ...activeTicket,
+    people_ahead: ahead,
+    estimated_wait: currentWait
   });
 });
 
-// Leave / Cancel Queue
+// Leave / Cancel Ticket
 apiRouter.post('/queue/leave', (req: Request, res: Response) => {
   const { ticket_id, customer_id } = req.body;
   const db = readDatabase();
 
-  const ticketIndex = db.queue.findIndex(q => 
-    (ticket_id && q.id === ticket_id) || (customer_id && q.customer_id === customer_id && q.status !== 'completed')
-  );
-
-  if (ticketIndex !== -1) {
-    db.queue[ticketIndex].status = 'cancelled';
+  const ticket = db.queue.find(q => q.id === ticket_id || (customer_id && q.customer_id === customer_id && q.status === 'waiting'));
+  if (ticket) {
+    ticket.status = 'cancelled';
     writeDatabase(db);
-    return res.json({ success: true, message: 'Queue ticket cancelled' });
   }
 
-  return res.status(404).json({ error: 'Ticket not found' });
+  return res.json({ success: true, message: 'Ticket cancelled' });
 });
 
-// Barber queue desk - get shop's live queue
+// Barber Desk: Active Queue List
 apiRouter.get('/barber/queue', (req: Request, res: Response) => {
   const { shop_id } = req.query;
   const db = readDatabase();
 
-  const activeShopId = shop_id ? String(shop_id) : db.shops[0]?.id;
+  const activeShopId = (shop_id as string) || (db.shops[0]?.id || '');
+  const shopQueue = db.queue.filter(q => q.shop_id === activeShopId);
 
-  const currentServing = db.queue.find(q => q.shop_id === activeShopId && q.status === 'serving');
-  const waitingList = db.queue.filter(q => q.shop_id === activeShopId && q.status === 'waiting');
+  const serving = shopQueue.find(q => q.status === 'serving') || null;
+  const waiting = shopQueue.filter(q => q.status === 'waiting');
+  const completedToday = shopQueue.filter(q => q.status === 'completed');
 
   return res.json({
-    serving: currentServing || null,
-    waiting: waitingList
+    serving,
+    waiting,
+    completed_today: completedToday.length,
+    waiting_count: waiting.length
   });
 });
 
-// Barber: Call Next Customer
+// Barber: Call Next Client
 apiRouter.post('/barber/queue/call-next', (req: Request, res: Response) => {
   const { shop_id } = req.body;
   const db = readDatabase();
+  const activeShopId = shop_id || (db.shops[0]?.id || '');
 
-  const activeShopId = shop_id || db.shops[0]?.id;
-
-  // Complete current serving if any
   const currentServing = db.queue.find(q => q.shop_id === activeShopId && q.status === 'serving');
   if (currentServing) {
     currentServing.status = 'completed';
   }
 
-  // Find next waiting
   const nextWaiting = db.queue.find(q => q.shop_id === activeShopId && q.status === 'waiting');
   if (nextWaiting) {
     nextWaiting.status = 'serving';
@@ -507,16 +545,90 @@ apiRouter.post('/barber/queue/complete', (req: Request, res: Response) => {
 });
 
 // ========================
-// APPOINTMENTS
+// COUPON VALIDATION
+// ========================
+apiRouter.post('/coupons/validate', (req: Request, res: Response) => {
+  const { code, amount } = req.body;
+  const db = readDatabase();
+
+  if (!code) {
+    return res.status(400).json({ error: 'Coupon code required' });
+  }
+
+  const normalized = String(code).trim().toUpperCase();
+  const coupon = (db.coupons || []).find(c => c.code.toUpperCase() === normalized && c.is_active);
+
+  if (!coupon) {
+    return res.status(404).json({ valid: false, error: 'Invalid or expired coupon code' });
+  }
+
+  const subtotal = Number(amount) || 0;
+  let discount = 0;
+  if (coupon.discount_type === 'percent') {
+    discount = (subtotal * coupon.discount_value) / 100;
+  } else {
+    discount = coupon.discount_value;
+  }
+
+  discount = Math.min(discount, subtotal);
+
+  return res.json({
+    valid: true,
+    code: coupon.code,
+    discount_type: coupon.discount_type,
+    discount_value: coupon.discount_value,
+    discount_amount: Number(discount.toFixed(2)),
+    final_amount: Number((subtotal - discount).toFixed(2))
+  });
+});
+
+// ========================
+// APPOINTMENTS & PAYMENTS
 // ========================
 
-// Book appointment
+// Book appointment with Payment & Fee Breakdown
 apiRouter.post('/appointments', (req: Request, res: Response) => {
-  const { shop_id, service_id, customer_id, customer_name, customer_phone, date, time_slot, notes } = req.body;
+  const {
+    shop_id,
+    service_id,
+    customer_id,
+    customer_name,
+    customer_phone,
+    date,
+    time_slot,
+    notes,
+    payment_method, // 'card' | 'upi' | 'cash'
+    coupon_code
+  } = req.body;
 
   const db = readDatabase();
   const shop = db.shops.find(s => s.id === shop_id) || db.shops[0];
+
+  if (shop && (shop.is_licensed === false || shop.license_status === 'suspended')) {
+    return res.status(403).json({ error: 'This barbershop is suspended and cannot accept bookings at this time.' });
+  }
+
   const service = db.services.find(s => s.id === service_id) || db.services[0];
+  const settings = db.settings || { platform_fee_fixed: 3.00, platform_fee_percent: 5.0, enable_coupons: true };
+
+  const basePrice = service ? Number(service.price) : 40.00;
+  const platformFee = Number((settings.platform_fee_fixed + (basePrice * (settings.platform_fee_percent / 100))).toFixed(2));
+  
+  let discount = 0;
+  if (coupon_code) {
+    const cpn = (db.coupons || []).find(c => c.code.toUpperCase() === String(coupon_code).trim().toUpperCase() && c.is_active);
+    if (cpn) {
+      if (cpn.discount_type === 'percent') {
+        discount = Number(((basePrice + platformFee) * (cpn.discount_value / 100)).toFixed(2));
+      } else {
+        discount = Math.min(cpn.discount_value, basePrice + platformFee);
+      }
+      cpn.usage_count = (cpn.usage_count || 0) + 1;
+    }
+  }
+
+  const totalPaid = Number(Math.max(0, (basePrice + platformFee - discount)).toFixed(2));
+  const chosenMethod = payment_method || 'card';
 
   const newAppointment: AppointmentEntry = {
     id: 'apt_' + crypto.randomUUID(),
@@ -529,16 +641,46 @@ apiRouter.post('/appointments', (req: Request, res: Response) => {
     time_slot: time_slot || '10:00 AM',
     notes: notes || '',
     status: 'confirmed',
-    price: service?.price || 40,
+    barber_price: basePrice,
+    platform_fee: platformFee,
+    discount_amount: discount,
+    total_paid: totalPaid,
     service_name: service?.name || 'Haircut',
     shop_name: shop?.name || 'BarberLoo',
+    payment_method: chosenMethod,
+    payment_status: chosenMethod === 'cash' ? 'pending_cash' : 'paid',
+    coupon_code: coupon_code || '',
     created_at: new Date().toISOString()
   };
 
   db.appointments.push(newAppointment);
+
+  // Record Transaction
+  const newTx: TransactionRecord = {
+    id: 'tx_' + crypto.randomUUID(),
+    appointment_id: newAppointment.id,
+    shop_id: shop?.id || '',
+    shop_name: shop?.name || '',
+    customer_id: newAppointment.customer_id,
+    customer_name: newAppointment.customer_name,
+    amount: totalPaid,
+    barber_earning: basePrice,
+    platform_fee: platformFee,
+    payment_method: chosenMethod,
+    payment_status: chosenMethod === 'cash' ? 'pending' : 'completed',
+    created_at: new Date().toISOString()
+  };
+
+  if (!db.transactions) db.transactions = [];
+  db.transactions.push(newTx);
+
   writeDatabase(db);
 
-  return res.json({ success: true, appointment: newAppointment });
+  return res.json({
+    success: true,
+    appointment: newAppointment,
+    transaction: newTx
+  });
 });
 
 // Get user appointments
@@ -551,20 +693,139 @@ apiRouter.get('/appointments/my', (req: Request, res: Response) => {
 });
 
 // ========================
-// ADMIN STATS & CONTROL
+// ADMIN MASTER CONTROL & REPORTS
 // ========================
+
+// 1. Admin Master Stats & Financial Report
 apiRouter.get('/admin/stats', (req: Request, res: Response) => {
   const db = readDatabase();
+
+  const transactions = db.transactions || [];
+  const totalVolume = transactions.reduce((acc, t) => acc + (t.amount || 0), 0);
+  const totalPlatformFees = transactions.reduce((acc, t) => acc + (t.platform_fee || 0), 0);
+  const totalBarberPayouts = transactions.reduce((acc, t) => acc + (t.barber_earning || 0), 0);
+
+  // Shop Performance Report
+  const shopReports = db.shops.map(shop => {
+    const shopTx = transactions.filter(t => t.shop_id === shop.id);
+    const shopAppointments = db.appointments.filter(a => a.shop_id === shop.id);
+    const shopQueue = db.queue.filter(q => q.shop_id === shop.id);
+
+    const revenue = shopTx.reduce((acc, t) => acc + t.amount, 0);
+    const barberEarning = shopTx.reduce((acc, t) => acc + t.barber_earning, 0);
+
+    return {
+      id: shop.id,
+      name: shop.name,
+      city: shop.city,
+      is_licensed: shop.is_licensed !== false,
+      license_status: shop.license_status || 'active',
+      total_bookings: shopAppointments.length,
+      total_queue_tickets: shopQueue.length,
+      gross_revenue: Number(revenue.toFixed(2)),
+      barber_net: Number(barberEarning.toFixed(2))
+    };
+  });
 
   return res.json({
     total_shops: db.shops.length,
     total_users: db.users.length,
     total_queue_tickets: db.queue.length,
     total_appointments: db.appointments.length,
+    financials: {
+      gross_volume: Number(totalVolume.toFixed(2)),
+      platform_revenue: Number(totalPlatformFees.toFixed(2)),
+      barber_payouts: Number(totalBarberPayouts.toFixed(2))
+    },
+    platform_settings: db.settings || { platform_fee_fixed: 3.00, platform_fee_percent: 5.0, enable_coupons: true },
+    shop_reports: shopReports,
+    recent_transactions: transactions.slice(-20).reverse(),
+    coupons: db.coupons || [],
     shops: db.shops,
-    users: db.users.map(({ password, ...u }) => u),
-    queue: db.queue
+    users: db.users.map(({ password, ...u }) => u)
   });
+});
+
+// 2. Admin: Toggle Shop License (Activate / Suspend)
+apiRouter.post('/admin/shops/:id/license', (req: Request, res: Response) => {
+  const { status, is_licensed } = req.body;
+  const db = readDatabase();
+
+  const shop = db.shops.find(s => s.id === req.params.id);
+  if (!shop) {
+    return res.status(404).json({ error: 'Shop not found' });
+  }
+
+  shop.is_licensed = is_licensed !== undefined ? Boolean(is_licensed) : status === 'active';
+  shop.license_status = status || (shop.is_licensed ? 'active' : 'suspended');
+
+  writeDatabase(db);
+
+  return res.json({
+    success: true,
+    message: `Shop license ${shop.license_status.toUpperCase()}`,
+    shop
+  });
+});
+
+// 3. Admin: Update Platform Fee Settings
+apiRouter.post('/admin/settings/fees', (req: Request, res: Response) => {
+  const { platform_fee_fixed, platform_fee_percent, enable_coupons } = req.body;
+  const db = readDatabase();
+
+  db.settings = {
+    platform_fee_fixed: platform_fee_fixed !== undefined ? Number(platform_fee_fixed) : (db.settings?.platform_fee_fixed || 3.0),
+    platform_fee_percent: platform_fee_percent !== undefined ? Number(platform_fee_percent) : (db.settings?.platform_fee_percent || 5.0),
+    enable_coupons: enable_coupons !== undefined ? Boolean(enable_coupons) : (db.settings?.enable_coupons !== false)
+  };
+
+  writeDatabase(db);
+  return res.json({ success: true, settings: db.settings });
+});
+
+// 4. Admin: Create or Update Coupon Code
+apiRouter.post('/admin/coupons', (req: Request, res: Response) => {
+  const { code, discount_type, discount_value, is_active } = req.body;
+  if (!code || !discount_value) {
+    return res.status(400).json({ error: 'Code and discount value required' });
+  }
+
+  const db = readDatabase();
+  if (!db.coupons) db.coupons = [];
+
+  const existingIdx = db.coupons.findIndex(c => c.code.toUpperCase() === String(code).trim().toUpperCase());
+  if (existingIdx !== -1) {
+    db.coupons[existingIdx] = {
+      ...db.coupons[existingIdx],
+      discount_type: discount_type || 'percent',
+      discount_value: Number(discount_value),
+      is_active: is_active !== false
+    };
+    writeDatabase(db);
+    return res.json({ success: true, coupon: db.coupons[existingIdx] });
+  }
+
+  const newCoupon: CouponCode = {
+    id: 'cpn_' + crypto.randomUUID(),
+    code: String(code).trim().toUpperCase(),
+    discount_type: discount_type || 'percent',
+    discount_value: Number(discount_value),
+    is_active: is_active !== false,
+    usage_count: 0,
+    created_at: new Date().toISOString()
+  };
+
+  db.coupons.push(newCoupon);
+  writeDatabase(db);
+  return res.json({ success: true, coupon: newCoupon });
+});
+
+// 5. Admin: Delete or Deactivate Coupon
+apiRouter.delete('/admin/coupons/:id', (req: Request, res: Response) => {
+  const db = readDatabase();
+  db.coupons = (db.coupons || []).filter(c => c.id !== req.params.id && c.code !== req.params.id);
+  writeDatabase(db);
+  return res.json({ success: true, message: 'Coupon removed' });
 });
 
 // ========================
