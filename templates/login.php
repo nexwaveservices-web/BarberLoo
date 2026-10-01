@@ -32,20 +32,6 @@ get_header();
       </button>
     </form>
 
-    <!-- Admin Quick Access Badge -->
-    <div style="margin-top: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 14px 16px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-      <div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span>🛡</span>
-          <span style="font-weight: 800; color: #166534; font-size: 0.85rem;">Platform Super Admin</span>
-        </div>
-        <div style="font-size: 0.8rem; color: #15803d; margin-top: 2px;">
-          <code>rgi855477@gmail.com</code>
-        </div>
-      </div>
-      <a href="<?php echo esc_url(home_url('/admin/dashboard')); ?>" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 5px 12px; background: #166534; border-color: #166534;">Admin Hub ⚡</a>
-    </div>
-
     <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--text-muted);">
       <span>New client? <a href="<?php echo esc_url(home_url('/signup')); ?>" style="color: var(--primary); font-weight: 700;">Sign Up</a></span>
       <span><a href="<?php echo esc_url(home_url('/barber/dashboard')); ?>" style="color: var(--text-main); font-weight: 600;">Barber PRO Desk</a></span>

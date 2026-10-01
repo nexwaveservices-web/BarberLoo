@@ -57,25 +57,8 @@
           </button>
         </form>
 
-        <!-- Admin Quick Access Badge -->
-        <div style="margin-top: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 14px 16px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span>🛡</span>
-              <span style="font-weight: 800; color: #166534; font-size: 0.85rem;">Platform Super Admin</span>
-            </div>
-            <div style="font-size: 0.8rem; color: #15803d; margin-top: 2px;">
-              <code>rgi855477@gmail.com</code>
-            </div>
-          </div>
-          <div style="display: flex; gap: 6px;">
-            <button type="button" id="btn-fill-admin" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 5px 10px;">Fill</button>
-            <button type="button" id="btn-admin-direct-enter" class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 5px 12px; background: #166534; border-color: #166534;">Instant Admin Login ⚡</button>
-          </div>
-        </div>
-
         <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--text-muted);">
-          <span>New admin? <a href="/signup.html?role=admin" style="color: var(--primary); font-weight: 700;">Register as Admin</a></span>
+          <span>New client? <a href="/signup.html" style="color: var(--primary); font-weight: 700;">Sign Up</a></span>
           <span><a href="/signup.html?role=barber" style="color: var(--text-main); font-weight: 600;">Barber Signup</a></span>
         </div>
       </div>
@@ -142,28 +125,6 @@
     const resetError = document.getElementById('reset-error');
     const resetSuccess = document.getElementById('reset-success');
     const btnSubmitReset = document.getElementById('btn-submit-reset');
-
-    // Super Admin Autofill helper
-    document.getElementById('btn-fill-admin').addEventListener('click', () => {
-      document.getElementById('email').value = 'rgi855477@gmail.com';
-      document.getElementById('password').focus();
-    });
-
-    // Instant Super Admin One-Click Login
-    document.getElementById('btn-admin-direct-enter').addEventListener('click', async () => {
-      const adminBtn = document.getElementById('btn-admin-direct-enter');
-      adminBtn.disabled = true;
-      adminBtn.textContent = 'Entering Admin...';
-      
-      localStorage.setItem('barberloo_local_session', JSON.stringify({
-        email: 'rgi855477@gmail.com',
-        role: 'admin',
-        full_name: 'Platform Administrator',
-        timestamp: Date.now()
-      }));
-
-      window.location.href = '/admin/dashboard.html';
-    });
 
     linkShowReset.addEventListener('click', () => {
       viewLogin.style.display = 'none';

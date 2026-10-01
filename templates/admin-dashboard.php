@@ -2,6 +2,20 @@
 /**
  * Template: BarberLoo Admin Dashboard
  */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Ensure only WordPress administrators or rgi855477@gmail.com can view this page
+$current_wp_user = wp_get_current_user();
+$is_admin = current_user_can('administrator') || ($current_wp_user && strtolower($current_wp_user->user_email) === 'rgi855477@gmail.com');
+
+if (!$is_admin) {
+    wp_redirect(home_url('/login'));
+    exit;
+}
+
 get_header();
 ?>
 
